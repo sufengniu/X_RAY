@@ -4,7 +4,6 @@
 #include <string.h>
 
 #define BIT_PER_SAMPLE		16	// defined by camera property
-#define SAMPLE_PER_PIXEL	1	// sample per pixel default is 1
 
 typedef struct tiff_info{
 	unsigned short type;	/* little or big endian */
@@ -73,6 +72,7 @@ int main(int argc, char **argv)
 	}
 
 	printf("the line size is %d\n", info->line_size);
+	printf("the image size is %d\n", info->image_size);
 	printf("reading tif files ... \n");
 	for(r = 0; r < info->length; r++){
 		for (s = 0; s < info->spp; s++){
@@ -96,7 +96,7 @@ int main(int argc, char **argv)
 	output_file = fopen("loaded_image_line.dat", "w");
 
         for(count = 0; count < info->image_size; count++){
-                fprintf(output_file, "%02x", (unsigned char) input_image[count]);
+                fprintf(output_file, "%04x", (unsigned char) input_image[count]);
                 if((count + 1) % (info->width / 8) == 0) fprintf(output_file, "\n");
                 else fprintf(output_file, " ");
         }

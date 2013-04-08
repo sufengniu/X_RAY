@@ -102,7 +102,7 @@ int main(int argc, char **argv)
 	output_file = fopen("loaded_image_strip.dat", "w");
 
         for(count = 0; count < buffer_size; count++){
-                fprintf(output_file, "%02x", (unsigned char) stripbuffer[count]);
+                fprintf(output_file, "%04x", (unsigned char) stripbuffer[count]);
                 if((count + 1) % (info->width / 8) == 0) fprintf(output_file, "\n");
                 else fprintf(output_file, " ");
         }
