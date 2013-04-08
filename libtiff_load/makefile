@@ -20,4 +20,4 @@ tar:
 	tar cxvf *.c *.h makefile
 
 clean:
-	rm -rf *.o scanline scanstrip scantile output.tif
+	rm -rf *.o scanline scanstrip scantile output.tif *.dat

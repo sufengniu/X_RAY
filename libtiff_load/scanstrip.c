@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <tiffio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define BIT_PER_SAMPLE		16	// defined by camera property
 #define SAMPLE_PER_PIXEL	1	// sample per pixel default is 1
@@ -14,6 +15,7 @@ typedef struct tiff_info{
 	unsigned short spp;	// sample per pixel, 16 bits per pixel for ANL camera
 	unsigned short bps;	// bit per sample, default is 1
 	int line_size;
+	int image_size;
 } tiff_info;
 
 int main(int argc, char **argv)
@@ -29,11 +31,14 @@ int main(int argc, char **argv)
 	TIFF *input_file;
 	int io_status;	// status of io operation
 	
-	/* according to tiffio library tsize_t is int32, tstrip_t is uint32 */		
+	/* according to tiffio library tsize_t is int32, tstrip_t is uint32 */	
 	tsize_t strip_size, buffer_size;
-	tstrip_t strip_max, strip_count;
+	tstrip_t strip_max, strip_count, strip_num;
 	unsigned long image_offset, result;
 	unsigned long count;
+
+	/* debugging purpose */
+	FILE *output_file;
 
 	input_file = TIFFOpen(argv[1], "r");
 	if(input_file == NULL){
@@ -63,11 +68,11 @@ int main(int argc, char **argv)
 	
 	printf("the strip_size is %u\n", strip_size);
 	printf("the strip_max is %u\n", strip_max);
-	printf("the buffer size if %u\n", buffer_size);
+	printf("the image size if %u\n", buffer_size);
 	printf("reading tif files...\n");
-	
+
 	if((stripbuffer = (unsigned char *)_TIFFmalloc(buffer_size)) == NULL){
-		fprintf(stderr, "Could not allocate enought memory for the uncompressed image!\n");
+		fprintf(stderr, "Could not allocate enough memory for uncompressed image!\n");
 		exit(42);
 	}
 	
@@ -82,16 +87,27 @@ int main(int argc, char **argv)
 		result = TIFFReadEncodedStrip( input_file, strip_count,
 						stripbuffer + image_offset,
 						strip_size);
+
 		image_offset += result;
 	}
 	
 	if(info->photo_metric != PHOTOMETRIC_MINISWHITE){
-                // Flip bits
-                printf("Fixing the photometric interpretation\n");
+		// Flip bits
+		printf("Fixing the photometric interpretation\n");
 
-                for(count = 0; count < buffer_size; count++)
-                stripbuffer[count] = ~stripbuffer[count];
+		for(count = 0; count < buffer_size; count++)
+		stripbuffer[count] = ~stripbuffer[count];
+	}
+
+	output_file = fopen("loaded_image_strip.dat", "w");
+
+        for(count = 0; count < buffer_size; count++){
+                fprintf(output_file, "%02x", (unsigned char) stripbuffer[count]);
+                if((count + 1) % (info->width / 8) == 0) fprintf(output_file, "\n");
+                else fprintf(output_file, " ");
         }
+
+        fclose(output_file);
 
 	// _TIFFfree(input_image);
 	_TIFFfree(stripbuffer);

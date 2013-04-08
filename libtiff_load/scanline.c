@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <tiffio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define BIT_PER_SAMPLE		16	// defined by camera property
 #define SAMPLE_PER_PIXEL	1	// sample per pixel default is 1
@@ -14,12 +15,14 @@ typedef struct tiff_info{
 	unsigned short spp;	// sample per pixel, 16 bits per pixel for ANL camera
 	unsigned short bps;	// bit per sample, default is 1
 	int line_size;
+	int image_size;
 } tiff_info;
 
 int main(int argc, char **argv)
 {
 	int r, c;	// height index and width index
-	
+	uint16 s;
+
 	struct tiff_info *info;	
 	info = (struct tiff_info *)malloc(sizeof(struct tiff_info));
 	
@@ -33,7 +36,9 @@ int main(int argc, char **argv)
 	tsize_t strip_size, buffer_size;
 	tstrip_t strip_max, strip_count;
 	unsigned long image_offset, result;
+	unsigned long count;
 	unsigned char *input_buffer;
+	FILE *output_file;	
 
 	input_file = TIFFOpen(argv[1], "r");
 	if(input_file == NULL){
@@ -53,16 +58,11 @@ int main(int argc, char **argv)
 	printf("bit per sample = %d\n", info->bps);
 	printf("sample per pixel = %d\n", info->spp);
 	printf("photo metirc is %d\n", info->photo_metric);
-		
-	if(info->spp == 0){
-		printf("Warning: the sample per pixel is not set, which should be 1!\n");
-		printf("automatically set sample per pixel to be 1\n");
-		info->spp = 1;
-	}	
-		
+	
 	info->line_size = TIFFScanlineSize(input_file);
-
-	if((input_image = (unsigned char *)_TIFFmalloc(info->line_size * info->length)) == NULL){
+	info->image_size = info->line_size * info->length;
+	
+	if((input_image = (unsigned char *)_TIFFmalloc(info->image_size)) == NULL){
 		fprintf(stderr, "Could not allocate enough memory for the uncompressed image!\n");
 		exit(42);
 	}
@@ -75,14 +75,33 @@ int main(int argc, char **argv)
 	printf("the line size is %d\n", info->line_size);
 	printf("reading tif files ... \n");
 	for(r = 0; r < info->length; r++){
-		TIFFReadScanline(input_file, scanline, r, 0);
-		for(c = 0; c < info->width; c++)
+		for (s = 0; s < info->spp; s++){
+			TIFFReadScanline(input_file, scanline, r, s);
+		}
+		for(c = 0; c < 2*info->width; c++)
 		{
-			input_image[info->width * r + c] = *(scanline + c);
-						
+			input_image[2*info->width * r + c] = *(scanline + c);
 		}
 		
 	}
+	
+	if(info->photo_metric != PHOTOMETRIC_MINISWHITE){
+                // Flip bits
+                printf("Fixing the photometric interpretation\n");
+
+                for(count = 0; count < info->image_size; count++)
+                input_image[count] = ~input_image[count];
+        }
+	
+	output_file = fopen("loaded_image_line.dat", "w");
+
+        for(count = 0; count < info->image_size; count++){
+                fprintf(output_file, "%02x", (unsigned char) input_image[count]);
+                if((count + 1) % (info->width / 8) == 0) fprintf(output_file, "\n");
+                else fprintf(output_file, " ");
+        }
+
+        fclose(output_file);
 	
 	_TIFFfree(input_image);
 	_TIFFfree(scanline);
