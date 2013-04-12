@@ -11,10 +11,11 @@ typedef struct tiff_info{
 	int length;
 	int depth;
 	unsigned short photo_metric;
-	unsigned short spp;	// sample per pixel, 16 bits per pixel for ANL camera
-	unsigned short bps;	// bit per sample, default is 1
+	uint32 spp;	// sample per pixel, 16 bits per pixel for ANL camera
+	uint16 bps;	// bit per sample, default is 1
 	int line_size;
 	int image_size;
+	uint16 config;
 } tiff_info;
 
 int main(int argc, char **argv)
@@ -52,12 +53,14 @@ int main(int argc, char **argv)
 	TIFFGetField(input_file, TIFFTAG_BITSPERSAMPLE, &info->bps);
 	TIFFGetField(input_file, TIFFTAG_SAMPLESPERPIXEL, &info->spp);
 	TIFFGetField(input_file, TIFFTAG_PHOTOMETRIC, &info->photo_metric);
-	
+	TIFFGetField(input_file, TIFFTAG_PLANARCONFIG, &info->config);
+		
 	printf("length = %d, width = %d\n", info->length, info->width);
 	printf("bit per sample = %d\n", info->bps);
 	printf("sample per pixel = %d\n", info->spp);
-	printf("photo metirc is %d\n", info->photo_metric);
-	
+	printf("photo metirc = %d\n", info->photo_metric);
+	printf("planar config = %d\n", info->config);
+
 	info->line_size = TIFFScanlineSize(input_file);
 	info->image_size = info->line_size * info->length;
 	
@@ -80,16 +83,26 @@ int main(int argc, char **argv)
 	printf("the image size is %d\n", info->image_size);
 	printf("reading tif files ... \n");
 
-	for(r = 0; r < info->length; r++){
-		for(s = 0; s < 2; s++){
+	if (info->config == PLANARCONFIG_CONTIG){
+		for(r = 0; r < info->length; r++){
 			TIFFReadScanline(input_file, scanline, r, s);
+			
+			for(c = 0; c < info->width; c++)
+			{
+				input_image[info->width * r + c] = *(scanline + c);
+			}
 		}
 		
-		for(c = 0; c < info->width; c++)
-		{
-			input_image[info->width * r + c] = *(scanline + c);
+	} else if (info->config == PLANARCONFIG_SEPARATE){
+		for(s = 0; s < info->spp; s++){
+			for(r = 0; r < info->length; r++){
+				TIFFReadScanline(input_file, scanline, r, s);
+				for(c = 0; c < info->width; c++)
+	                        {
+        	                        input_image[info->width * r + c] = *(scanline + c);
+                	        }
+              		}
 		}
-				
 	}
 
 	output_file = fopen("loaded_image_line.dat", "w");
