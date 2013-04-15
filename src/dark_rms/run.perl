@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
-@program_names = ("dark_avg");
-%program_nodes = ("dark_avg", 5);
+@program_names = ("dark_rms");
+%program_nodes = ("dark_rms", 5);
 
 $program_to_run = $ARGV[0];
 if (!$program_to_run || !$program_nodes{$program_to_run}) {

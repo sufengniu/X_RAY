@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <tiffio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #define BIT_PER_SAMPLE		16	// defined by camera property
 

@@ -1,8 +1,6 @@
 CC=mpicc
 CFLAGS=-g
-OBJECT=dark_avg
-
-.PHONY: all tar clean
+OBJECT=dark_rms
 
 all: $(OBJECT)
 

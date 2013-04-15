@@ -491,7 +491,7 @@ DWORD got;
 //unsigned int ifdlen; define in class 
 //unsigned int specs[6]; define in header in class scope
 // make emptuy IFD
-		specs.width = 0;
+	specs.width = 0;
 	specs.length= 0;
 	specs.bit_depth=16;
 	specs.compression = 1;
@@ -541,10 +541,7 @@ DWORD got;
     
 fclose(fp);
 
-
 #endif
-
-
 	//read in the header etc.
 	tifRdInfo(filename);
 
@@ -576,7 +573,7 @@ DWORD got;
 //unsigned int specs[6]; define in header in class scope
 this->fp = this->file_pointer;
 
-		specs.width = 0;
+	specs.width = 0;
 	specs.length= 0;
 	specs.bit_depth=16;
 	specs.compression = 1;
@@ -691,9 +688,6 @@ unsigned int sz;
 
 #endif
 
-
-
-
 	}
   
 }
@@ -709,12 +703,12 @@ DWORD got;
   unsigned int got;
 #endif
 
-  unsigned int strt;
+unsigned int strt;
 unsigned int sz;
 
 this->fp = fp;
 
-		specs.width = 0;
+	specs.width = 0;
 	specs.length= 0;
 	specs.bit_depth=16;
 	specs.compression = 1;
@@ -753,7 +747,6 @@ this->fp = fp;
 		fread(head_data,1,sz,fp);
 
 #endif
-
     
 	}  
 }

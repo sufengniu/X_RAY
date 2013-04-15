@@ -1,0 +1,9 @@
+
+Invoking autoreconf in build directory: /home/sniu/lab/x_ray/src/tim_tif/tim_tif
+
+sh -c "autoreconf -i" 
+autoreconf: `configure.ac' or `configure.in' is required
+
+Configuration failed with error
+Build stopped
+()

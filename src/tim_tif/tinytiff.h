@@ -32,7 +32,7 @@
  * Double incluson protection.
  */
 #ifndef _TINYTIFF_H
-	#define _TINYTIFF_H
+#define _TINYTIFF_H
 
 namespace tinytiff_plugin {
 
@@ -63,8 +63,6 @@ class tinytiff_exception
 		// Return error message.
 		error_code getErrCode(void);
 
-
-
 	protected:
 	// Error message in this exception.
 		char err[256];
@@ -77,7 +75,6 @@ class tinytiff_exception
 /*******************************************************************************
  *
  *	Class tifffile
- *
  *
  ******************************************************************************/
 
@@ -107,7 +104,6 @@ class tinytiff
 		void tifRd(char* filename,unsigned short* img);
 		void tifRd(unsigned short* img);
 
-
 		// reads info on tiff file- fills in structures
 		void tifRdInfo(char* filename);
 		void tifRdInfo(HANDLE fp);
@@ -123,19 +119,13 @@ class tinytiff
 			int sizex,
 			int sizey);
 
-	
-
-
 		void tifWriteIFD(void);
 
 		void tifMakeIFD(void);
 		void tifImgSpecs(void);
 
-
 		char* getHeader(void);
 		void putStrHeader(char * strg);
-
-
 
 		class img_specs 
 		{
@@ -195,16 +185,11 @@ class tinytiff
 		
 		//char file_name[255];
 
-		
-
 		// header data not tiff header- bessrc data header
-	//	char head_data[header_size];
+		// char head_data[header_size];
 		tiff_header header;
 
 		char *header_ptr;
-
-
-
 
 		// raw IFD data buffer
 		ifd_field ifd[64];
@@ -212,8 +197,7 @@ class tinytiff
 		unsigned short num_ifd_fields;
 		unsigned int next_ifd;
 
-
-};
+	};
 };//namespace
 #endif
 

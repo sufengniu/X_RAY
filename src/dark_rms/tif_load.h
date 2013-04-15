@@ -1,5 +1,9 @@
-#include "tif_load.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <tiffio.h>
 
+
+// remove
 #define BIT_PER_SAMPLE		16	// defined by camera property
 
 typedef struct tiff_info{
