@@ -31,12 +31,7 @@ int main(int argc, char **argv)
 	TIFF *input_file;
 	int io_status;	// status of io operation
 	
-	/* according to tiffio library tsize_t is int32, tstrip_t is uint32 */		
-	tsize_t strip_size, buffer_size;
-	tstrip_t strip_max, strip_count;
-	unsigned long image_offset, result;
-	unsigned long count;
-	unsigned char *input_buffer;
+	unsigned long count;	
 	FILE *output_file;	
 
 	input_file = TIFFOpen(argv[1], "r");
@@ -97,10 +92,10 @@ int main(int argc, char **argv)
 			for(r = 0; r < info->length; r++){
 				TIFFReadScanline(input_file, scanline, r, s);
 				for(c = 0; c < info->width; c++)
-	                        {
-        	                        input_image[info->width * r + c] = *(scanline + c);
-                	        }
-              		}
+				{
+					input_image[info->width * r + c] = *(scanline + c);
+				}
+			}
 		}
 	}
 

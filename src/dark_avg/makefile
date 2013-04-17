@@ -6,14 +6,14 @@ OBJECT=dark_avg
 
 all: $(OBJECT)
 
-$(OBJECT): $(OBJECT).o tif_load.o
+$(OBJECT): $(OBJECT).o tif_access.o
 	$(CC) $(CFLAGS) $(OBJECT).o -o $(OBJECT) -lm
 
 $(OBJECT).o: $(OBJECT).c
 	$(CC) $(CFLAGS) -c $(OBJECT).c -o $(OBJECT).o
 
-tif_load.o: tif_load.c tif_load.h
-	$(CC) $(CFLAGS) -c tif_load.c -o tif_load.o -ltiff
+tif_access.o: tif_access.c tif_access.h
+	$(CC) $(CFLAGS) -c tif_access.c -o tif_access.o -ltiff
 
 tar: 
 	tar cxvf *.c *.h makefile
