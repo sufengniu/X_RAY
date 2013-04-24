@@ -7,6 +7,8 @@
 
 #define BIT_PER_SAMPLE          16      // defined by camera property
 
+uint16 *input_image;
+
 typedef struct tiff_info{
         unsigned short type;    /* little or big endian */
         int width;
@@ -20,7 +22,7 @@ typedef struct tiff_info{
         uint16 config;
 } tiff_info;
 
-int tif_load(int argc, char **argv, uint16 *input_image);
+int tif_load(int argc, char **argv);
 void tif_release(uint16 *image);
 
 #endif /* tif.h */

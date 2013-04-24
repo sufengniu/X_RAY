@@ -1,6 +1,6 @@
 #include "tif.h"
 
-int tif_load(int argc, char **argv, uint16 *input_image)
+int tif_load(int argc, char **argv)
 {
 	int r, c;	// height index, width index
 	uint16 s;
@@ -13,7 +13,7 @@ int tif_load(int argc, char **argv, uint16 *input_image)
 	unsigned long image_offset;
 	uint16 *scanline;	
 	TIFF *tif;
-
+	
 	tif = TIFFOpen(argv[1], "r");
 	if(tif == NULL){
 		fprintf(stderr, "ERROR: Could not open input image!\n");
