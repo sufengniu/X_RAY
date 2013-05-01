@@ -1,11 +1,35 @@
+/* tif threads */
 #include "tif.h"
 
-int tif_load(int argc, char **argv)
+/* when tif loading as subthread */
+void *tif(void *arg)
+{
+	tif_thread_arg *p = (tif_thread_arg *)arg;
+	printf("----------------------------------------------------------\n");
+	printf("Starting tif loading thread, thread %d: process %d\n", p->tid, p->pid);
+	printf("----------------------------------------------------------\n");
+	
+
+	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
+	
+	tif_load(p->argv);
+	
+	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
+
+	accum = (stop.tv_sec - start.tv_sec)+(double)(stop.tv_nsec-start.tv_nsec)/(double)BILLION;
+	printf("done in %lf second\n", accum);
+
+	printf("tif loading thread done\n");
+}
+
+/* tif load function */
+int tif_load(char **argv)
 {
 	int r, c;	// height index, width index
 	uint16 s;
 	int dircount = 0;
-	
+	int bound;	
+
 	struct tiff_info *info;	
 	info = (struct tiff_info *)malloc(sizeof(struct tiff_info));
 	
@@ -14,7 +38,7 @@ int tif_load(int argc, char **argv)
 	uint16 *scanline;	
 	TIFF *tif;
 	
-	tif = TIFFOpen(argv[1], "r");
+	tif = TIFFOpen(argv[0], "r");
 	if(tif == NULL){
 		fprintf(stderr, "ERROR: Could not open input image!\n");
 		exit(1);
@@ -24,7 +48,10 @@ int tif_load(int argc, char **argv)
 	do {
 		dircount++;
 	} while (TIFFReadDirectory(tif));
-	printf("%d images in %s\n", dircount, argv[1]);
+	printf("%d images in %s\n", dircount, argv[0]);
+	
+	/* global variable */
+	pages = dircount;
 	
 	// input image paramters
 	TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &info->length);
@@ -33,12 +60,23 @@ int tif_load(int argc, char **argv)
 	TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL, &info->spp);
 	TIFFGetField(tif, TIFFTAG_PHOTOMETRIC, &info->photo_metric);
 	TIFFGetField(tif, TIFFTAG_PLANARCONFIG, &info->config);
+
+	/* here to set image size
+	info->length = LENGTH;
+	info->width = WIDTH;
+	*/
+	
+	/* global variable */
+	buffer_length = info->length/NUM_PROCESS_THREADS;
+	buffer_width = info->width;
 		
 	printf("length = %d, width = %d\n", info->length, info->width);
 	printf("bit per sample = %d\n", info->bps);
 	printf("sample per pixel = %d\n", info->spp);
 	printf("photo metirc = %d\n", info->photo_metric);
 	printf("planar config = %d\n", info->config);
+	
+	printf("Image is splitted into %d blocks for multiple threads, each block has %d lines\n", NUM_PROCESS_THREADS, buffer_length);
 
 	info->line_size = TIFFScanlineSize(tif);
 	info->image_size = info->line_size * info->length;
@@ -67,7 +105,7 @@ int tif_load(int argc, char **argv)
 	printf("loading tif files ... \n");
 
 	TIFFSetDirectory(tif, 0);
-
+	
 	do {
 		if (info->config == PLANARCONFIG_CONTIG){
 			for(r = 0; r < info->length; r++){
@@ -76,6 +114,11 @@ int tif_load(int argc, char **argv)
 				for(c = 0; c < info->width; c++)
 				{		
 					input_image[image_offset + info->width * r + c] = *(scanline + c);
+				}
+
+				if((r+1) % buffer_length == 0){
+					thread_sel = (int)((r+1)/buffer_length);
+					pthread_cond_signal(&thread_sel_cv);
 				}
 			}
 		} else if (info->config == PLANARCONFIG_SEPARATE){
@@ -86,17 +129,22 @@ int tif_load(int argc, char **argv)
 	                        	{
         	                        	input_image[image_offset + info->width * r + c] = *(scanline + c);
                 	        	}
-              			}
+
+					if((r+1) % buffer_length == 0){
+						thread_sel = (int)((r+1)/buffer_length);
+						pthread_cond_signal(&thread_sel_cv);
+					}
+				}
 			}
 		}
-		image_offset += info->image_size/2;
+		image_offset += info->image_size/sizeof(uint16);
 	} while (TIFFReadDirectory(tif));
 	printf("reading done.\n");
 
 	_TIFFfree(scanline);
 	
-	TIFFClose(tif);	
-	
+	TIFFClose(tif);
+
 	return 0;
 }
 

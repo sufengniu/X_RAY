@@ -2,7 +2,7 @@
 
 $data_file = $ARGV[1];
 @program_names = ("dark_avg");
-%program_nodes = ("dark_avg", 5);
+%program_nodes = ("dark_avg", 3);
 
 $program_to_run = $ARGV[0];
 if (!$program_to_run || !$program_nodes{$program_to_run}) {
@@ -20,6 +20,6 @@ if (!$program_to_run || !$program_nodes{$program_to_run}) {
     $hosts = "";
   }
 
-  print "$mpirun -gdb -n $program_nodes{$program_to_run} $hosts ./$program_to_run $data_file\n";
-  system("$mpirun -gdb -n $program_nodes{$program_to_run} $hosts ./$program_to_run $data_file");
+  print "$mpirun -n $program_nodes{$program_to_run} $hosts $program_to_run $data_file\n";
+  system("$mpirun -n $program_nodes{$program_to_run} $hosts $program_to_run $data_file");
 }

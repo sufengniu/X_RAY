@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <tiffio.h>
 #include <stdlib.h>
+#include <time.h>
+
+#define BILLION 1000000000L;
 
 #define BIT_PER_SAMPLE		16	// defined by camera property
 
@@ -17,8 +20,14 @@ typedef struct tiff_info{
 	uint16 config;
 } tiff_info;
 
+uint16 *input_image;
+
 int main(int argc, char **argv)
 {
+	// clock_t start, end;
+        struct timespec start, stop;
+        double accum;
+
 	int r, c;	// height index, width index
 	uint16 s;
 	int dircount = 0;
@@ -28,7 +37,7 @@ int main(int argc, char **argv)
 	
 	uint32 data_size;
 	unsigned long image_offset;
-	uint16 *input_image;
+	//uint16 *input_image;
 	uint16 *scanline;	
 	TIFF *tif;
 
@@ -88,6 +97,7 @@ int main(int argc, char **argv)
 	printf("the total sequence image size is %d\n", data_size);
 	printf("loading tif files ... \n");
 
+	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 	TIFFSetDirectory(tif, 0);
 
 	do {
@@ -114,6 +124,10 @@ int main(int argc, char **argv)
 		image_offset += info->image_size/2;
 	} while (TIFFReadDirectory(tif));
 	printf("reading done.\n");
+
+	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
+        accum = (stop.tv_sec - start.tv_sec)+(double)(stop.tv_nsec-start.tv_nsec)/(double)BILLION;
+        printf("done in %lf second\n", accum);
 
 	printf("writing to loadded_image_line.dat file...\n");
 	output_file = fopen("loaded_image_line.dat", "w");

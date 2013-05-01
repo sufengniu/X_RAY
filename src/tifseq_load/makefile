@@ -4,7 +4,7 @@ CFLAGS=-g -Wall
 all: multi_scan test
 
 multi_scan: multi_scan.o
-	$(CC) $(CFLAGS) multi_scan.o -o multi_scan -ltiff 
+	$(CC) $(CFLAGS) multi_scan.o -o multi_scan -ltiff -lrt 
 
 multi_scan.o: multi_scan.c
 	$(CC) $(CFLAGS) -c multi_scan.c -o multi_scan.o

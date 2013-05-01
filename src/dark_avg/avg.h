@@ -1,11 +1,9 @@
-#ifndef TIF_H_
-#define TIF_H_
+#ifndef AVG_H_
+#define AVG_H_
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <mpi.h>
+#include "sys_config.h"
 
-int tif_load(int argc, char **argv, uint16 *input_image);
+void *avg(void *arg);
 
-#endif /* tif.h */
+#endif /* avg.h */
 

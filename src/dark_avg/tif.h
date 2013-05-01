@@ -1,13 +1,8 @@
 #ifndef TIF_H_
 #define TIF_H_
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <tiffio.h>
-
-#define BIT_PER_SAMPLE          16      // defined by camera property
-
-uint16 *input_image;
+#include "sys_config.h"
 
 typedef struct tiff_info{
         unsigned short type;    /* little or big endian */
@@ -22,7 +17,8 @@ typedef struct tiff_info{
         uint16 config;
 } tiff_info;
 
-int tif_load(int argc, char **argv);
+void *tif(void *arg);
+int tif_load(char **argv);
 void tif_release(uint16 *image);
 
 #endif /* tif.h */
