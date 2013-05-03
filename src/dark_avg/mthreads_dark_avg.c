@@ -14,14 +14,16 @@
 
 int main(int argc, char *argv[])
 {
+
+/*
+* initiliazation, threads number definition, parameters definition
+*/
 	int rc;
 	void *status;
-
-	/* threads processing data begin adress and end address  */
-	int i, begin, end;
-		
+	int i;	
+	
 	NUM_THREADS = DEFAULT_THREADS_NUM;	// defined in sys_config.h	
-	NUM_PROCESS_THREADS = NUM_THREADS-2;
+	NUM_PROCESS = 1;
 
 	if (argc == 3){
 		NUM_THREADS = atoi(argv[1]);
@@ -38,6 +40,18 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 	
+	printf("---------------------------------------------\n");
+	printf("---- X-ray camera dark average operation ----\n");
+	printf("---------------------------------------------\n");
+	printf("-- hardware information: \n");
+	printf("-- \tcore number: %d\n", NUM_CORE);
+	printf("-- \tblades number: %d\n", NUM_BLADES);
+	printf("-- software definition: \n");
+	printf("-- \tthreads number: %d\n", NUM_THREADS);
+	printf("-- \tprocess number: %d\n", NUM_PROCESS);
+	
+	NUM_PROCESS_THREADS = NUM_THREADS - 3;
+	
 	pthread_t *threads;
 	pthread_attr_t attr;
 	
@@ -53,16 +67,20 @@ int main(int argc, char *argv[])
 	
 	starg = (slave_thread_arg *)malloc((NUM_PROCESS_THREADS) * sizeof(slave_thread_arg));	// 1 tif thread and 1 synthesis thread
 	
+	pthread_cond_init(&thread_sel_cv, NULL);
+	pthread_cond_init(&image_tag_rdy, NULL);
+		
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);	
 
 /*
 * the main thread will launch NUM_THREADS-2 subthreads
 * tif/udp socket can be implemented in main thread
+* one thread responds synthesis subthreads
 * 
-*
 */
-	printf("create tif loading thread\n");
+	/*------------------ tif thread ---------------------*/
+	printf("master thread: create tif loading thread\n");
 	/* tif loading thread, comment it when call tif in main thread */
 	ttarg->tid = 0;
 	ttarg->pid = 0;
@@ -83,15 +101,24 @@ int main(int argc, char *argv[])
         printf("done in %lf second\n", accum);
 	*/
 	
-	/* malloc buffer for multiple sub threadsi */
+	/*------------------ processing threads ---------------------*/
+	pthread_cond_wait(&image_tag_rdy, &init_mutex);
 	
+	/* malloc buffer for multiple sub threads */	
 	buffer = (uint16 **)malloc(NUM_PROCESS_THREADS * sizeof(void *));
 	for(i = 0; i<NUM_PROCESS_THREADS; i++){
 		*(buffer+i) = (uint16 *)malloc(buffer_length * buffer_width * sizeof(uint16));
 	}
-	printf("buffer length is %d, buffer width is %d\n", buffer_length, buffer_width);
+	buffer_size = buffer_length * buffer_width;
+	printf("master thread: buffer size is %d\n", buffer_size);
+	printf("master thread: buffer length is %d, buffer width is %d\n", buffer_length, buffer_width);
 	
-	printf("create %d processing threads\n", NUM_PROCESS_THREADS);
+	pthread_mutex_lock(&count_mutex);
+	buffer_counter = 0;
+	pthread_mutex_unlock(&count_mutex);
+		
+	/* assign thread number from 1 to NUM_PROCESS_THREADS */	
+	printf("master thread: create %d processing threads\n", NUM_PROCESS_THREADS);
 	for (i = 0; i<NUM_PROCESS_THREADS; i++){
 		starg[i+1].tid = i+1;
 		starg[i+1].pid = 0;
@@ -111,16 +138,29 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 */
+
 	/* wait for all threads complete */
 	for (i = 0; i<NUM_THREADS; i++){
 		pthread_join(threads[i], &status);	
 	}
 
 	/* Clean up and exit */
+	printf("-- free memory space and clean up \n");
 	pthread_attr_destroy(&attr);
+	pthread_cond_destroy(&thread_sel_cv);
+	pthread_cond_destroy(&image_tag_rdy);	
+	
+	free(ttarg);
+	free(starg);
+	free(threads);
+	for (i = 0; i<NUM_PROCESS_THREADS; i++){
+		free(buffer[i]);
+	}
+	free(buffer);
 
 	tif_release(input_image);
 	pthread_mutex_destroy(&sel_mutex);	
+	pthread_mutex_destroy(&init_mutex);
 
 	pthread_exit(NULL);	
 	return 0;
