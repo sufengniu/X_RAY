@@ -12,7 +12,7 @@
 #define NUM_CORE		8
 #define NUM_BLADES		1
 
-#define MAX_THREAD              8       // maxium threads number, defined by the hardware
+#define MAX_THREAD              50       // maxium threads number, defined by the hardware
 #define BIT_PER_SAMPLE          16      // defined by camera property
 #define DEFAULT_THREADS_NUM     8       // default threads number
 
@@ -27,6 +27,7 @@ uint16 *input_image;
 uint16 **buffer;
 int buffer_width, buffer_length;
 int buffer_size;
+int buffer_counter;
 int pages, page_size, page_num;
 
 int thread_sel;		// switch to threads
@@ -36,11 +37,10 @@ pthread_cond_t thread_sel_cv, image_tag_rdy, thread_init_rdy;
 						// thread_init_rdy: processing threads initial done
 						// image_tag_rdy: tag initialization flag
 pthread_mutex_t sel_mutex, init_mutex;
-pthread_mutex_t count_mutex;			// buffer counter mutex
 
 /* clock_t start, end */
-struct timespec start, stop;
-double accum;
+struct timespec start[8], stop[8];
+double accum[8];
 
 /* arg for slave threads */
 typedef struct slave_thread_arg

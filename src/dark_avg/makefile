@@ -11,7 +11,7 @@ OBJECT=mthreads_dark_avg
 all: $(OBJECT)
 
 $(OBJECT): $(OBJECT).o tif.o avg.o
-	$(CC) $(CFLAGS) -pthread $(OBJECT).o tif.o avg.o -o $(OBJECT) -lm -ltiff -lrt
+	$(CC) $(CFLAGS) -lpthread $(OBJECT).o tif.o avg.o -o $(OBJECT) -lm -ltiff -lrt
 
 $(OBJECT).o: $(OBJECT).c tif.h avg.h sys_config.h
 	$(CC) $(CFLAGS) -c $(OBJECT).c -o $(OBJECT).o

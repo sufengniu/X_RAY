@@ -10,14 +10,14 @@ void *tif(void *arg)
 	printf("----------------------------------------------------------\n");
 	
 
-	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
+	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start[p->tid]);
 	
 	tif_load(p->argv);
 	
-	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
+	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop[p->tid]);
 
-	accum = (stop.tv_sec - start.tv_sec)+(double)(stop.tv_nsec-start.tv_nsec)/(double)BILLION;
-	printf("thread %d: done in %lf second\n", p->tid, accum);
+	accum[p->tid] = (stop[p->tid].tv_sec - start[p->tid].tv_sec)+(double)(stop[p->tid].tv_nsec-start[p->tid].tv_nsec)/(double)BILLION;
+	printf("thread %d: done in %lf second\n", p->tid, accum[p->tid]);
 
 	printf("thread %d: tif loading thread done\n", p->tid);
 	pthread_exit(NULL);
@@ -114,9 +114,6 @@ int tif_load(char **argv)
 	/* wait all processing threads initial done */
 	do{
 		pthread_cond_wait(&thread_init_rdy, &init_mutex);
-		
-		// testing point
-		printf("waiting point 1\n ");
 	} while(thread_status < NUM_PROCESS_THREADS);
 
 	TIFFSetDirectory(tif, 0);
@@ -131,13 +128,14 @@ int tif_load(char **argv)
 					input_image[image_offset + info->width * r + c] = *(scanline + c);
 				}
 
+				pthread_mutex_lock(&sel_mutex);
 				if((r+1) % buffer_length == 0){
-					pthread_mutex_lock(&sel_mutex);
 					thread_sel = (int)((r+1)/buffer_length);
+					buffer_counter++;
 					printf("r is %d, thread_sel is %d\n", r, thread_sel);
 					pthread_cond_broadcast(&thread_sel_cv);
-					pthread_mutex_unlock(&sel_mutex);
 				}
+				pthread_mutex_unlock(&sel_mutex);
 			}
 		} else if (info->config == PLANARCONFIG_SEPARATE){
 			for(s = 0; s < info->spp; s++){
@@ -148,13 +146,14 @@ int tif_load(char **argv)
         	                        	input_image[image_offset + info->width * r + c] = *(scanline + c);
                 	        	}
 
+					pthread_mutex_lock(&sel_mutex);
 					if((r+1) % buffer_length == 0){
-						pthread_mutex_lock(&sel_mutex);
 						thread_sel = (int)((r+1)/buffer_length);
+						buffer_counter++;
 						printf("r is %d, thread_sel is %d\n", r, thread_sel);
 						pthread_cond_broadcast(&thread_sel_cv);
-						pthread_mutex_unlock(&sel_mutex);
 					}
+					pthread_mutex_unlock(&sel_mutex);
 				}
 			}
 		}

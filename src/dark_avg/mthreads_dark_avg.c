@@ -24,6 +24,7 @@ int main(int argc, char *argv[])
 	
 	NUM_THREADS = DEFAULT_THREADS_NUM;	// defined in sys_config.h	
 	NUM_PROCESS = 1;
+	buffer_counter = 0;
 
 	if (argc == 3){
 		NUM_THREADS = atoi(argv[1]);
@@ -69,7 +70,10 @@ int main(int argc, char *argv[])
 	
 	pthread_cond_init(&thread_sel_cv, NULL);
 	pthread_cond_init(&image_tag_rdy, NULL);
-		
+	pthread_cond_init(&thread_init_rdy, NULL);
+	pthread_mutex_init(&sel_mutex, NULL);
+	pthread_mutex_init(&init_mutex, NULL);
+	
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);	
 
@@ -112,10 +116,6 @@ int main(int argc, char *argv[])
 	buffer_size = buffer_length * buffer_width;
 	printf("master thread: buffer size is %d\n", buffer_size);
 	printf("master thread: buffer length is %d, buffer width is %d\n", buffer_length, buffer_width);
-	
-	pthread_mutex_lock(&count_mutex);
-	buffer_counter = 0;
-	pthread_mutex_unlock(&count_mutex);
 		
 	/* assign thread number from 1 to NUM_PROCESS_THREADS */	
 	printf("master thread: create %d processing threads\n", NUM_PROCESS_THREADS);
@@ -149,7 +149,8 @@ int main(int argc, char *argv[])
 	pthread_attr_destroy(&attr);
 	pthread_cond_destroy(&thread_sel_cv);
 	pthread_cond_destroy(&image_tag_rdy);	
-	
+	pthread_cond_destroy(&thread_init_rdy);
+
 	free(ttarg);
 	free(starg);
 	free(threads);
@@ -159,7 +160,8 @@ int main(int argc, char *argv[])
 	free(buffer);
 
 	tif_release(input_image);
-	pthread_mutex_destroy(&sel_mutex);	
+	// testing
+	pthread_mutex_destroy(&sel_mutex);
 	pthread_mutex_destroy(&init_mutex);
 
 	pthread_exit(NULL);	

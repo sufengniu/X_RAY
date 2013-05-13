@@ -15,14 +15,10 @@ void *avg(void *arg)
 	
 	init((p+1)->tid);
 	
-	// test point
-	printf("pending point1 \n");
-
 	/* hand shaking to trigger tif thread */
 	pthread_mutex_lock(&init_mutex);
 	pthread_cond_signal(&thread_init_rdy);
 	thread_status++;
-	printf("thread %d: thread status is %d \n", (p+1)->tid, thread_status);
 	pthread_mutex_unlock(&init_mutex);
 	
 	avg_op((p+1)->tid);
@@ -49,29 +45,29 @@ int init(int tid)
 /* average operation */
 int avg_op(int tid)
 {
-	int i, j, k;	// i: column, j: row, k: buffer number
+	int i, j;	// i: column, j: row, k: buffer number
 
 	printf("thread %d: dark average operation begin ... \n", tid);
 
 	/* threads wake up when thread_sel_cv signal sent */
-        for (k = 0; k<NUM_PROCESS_THREADS * pages; k++){
-		
-		pthread_cond_wait(&thread_sel_cv, &sel_mutex);
+	while(buffer_counter < NUM_PROCESS_THREADS * pages){
+	
+		pthread_mutex_lock(&sel_mutex);
+                pthread_cond_wait(&thread_sel_cv, &sel_mutex);
 
-		if (thread_sel == tid){
-			
-			pthread_mutex_lock(&count_mutex);
-			buffer_counter++;
-			printf("thread %d: counter is %d, k is %d\n", tid, buffer_counter, k);
-			pthread_mutex_unlock(&count_mutex);
+                // testing point
+                //pthread_mutex_unlock(&sel_mutex);
+
+		if(thread_sel == tid){
+			printf("thread %d: triggered, buffer_counter is %d, thread_sel is %d\n", tid, buffer_counter, thread_sel);
 			
 			// testing point: measure computation time
-			clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
+			clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start[tid]);
+			
+			page_num = (buffer_counter+1)/NUM_PROCESS_THREADS;
 
 			for (i = 0; i<buffer_length; i++){
 				for (j = 0; j<buffer_width; j++){
-					page_num = (buffer_counter+1)/NUM_PROCESS_THREADS;
-					
 					image_index = j + i * buffer_width + (thread_sel-1) * buffer_size + page_num * page_size;
                                         /* caculate in recursive way */
 					*(*(buffer + thread_sel - 1) + j + i * buffer_width) += input_image[image_index];
@@ -80,11 +76,11 @@ int avg_op(int tid)
 				}
 			}
 			
-			clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
-			accum = (stop.tv_sec - start.tv_sec)+(double)(stop.tv_nsec-start.tv_nsec)/(double)BILLION;
-			printf("thread %d done in %lf second\n", tid, accum);
-			// tesing point
+			clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop[tid]);
+			accum[tid] = (stop[tid].tv_sec - start[tid].tv_sec)+(double)(stop[tid].tv_nsec-start[tid].tv_nsec)/(double)BILLION;
+			printf("thread %d done in %lf second, thread_sel is %d, buffer counter is %d\n", tid, accum[tid], thread_sel, buffer_counter);
 		}
+		pthread_mutex_unlock(&sel_mutex);
 	}
 	printf("thread %d: average computation done\n", tid);
 
