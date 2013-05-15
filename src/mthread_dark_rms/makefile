@@ -3,8 +3,8 @@
 # Company: Argonne National Lab
 
 CC=gcc
-CFLAGS=-g
-OBJECT=mthreads_dark_avg
+CFLAGS=-g -O3
+OBJECT=mthreads_dark_rms
 COMP=rms
 
 .PHONY: all tar clean

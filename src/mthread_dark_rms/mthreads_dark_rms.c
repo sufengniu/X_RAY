@@ -8,7 +8,7 @@
 *------------------------------------------------------*/
 #include "sys_config.h"
 #include "tif.h"	// tif loading thread
-#include "avg_1.h"	// dark average operation
+#include "rms.h"	// dark average operation
 //#include "thr_pool.h"
 
 /* add customized thread header file here */
