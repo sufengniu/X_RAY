@@ -3,27 +3,28 @@
 # Company: Argonne National Lab
 
 CC=gcc
-CFLAGS=-g -O3
+CFLAGS=-g
 OBJECT=mthreads_dark_avg
+COMP=avg_2
 
 .PHONY: all tar clean
 
 all: $(OBJECT)
 
-$(OBJECT): $(OBJECT).o tif.o avg.o
-	$(CC) $(CFLAGS) -lpthread $(OBJECT).o tif.o avg.o -o $(OBJECT) -lm -ltiff -lrt
+$(OBJECT): $(OBJECT).o tif.o $(COMP).o thr_pool.o
+	$(CC) $(CFLAGS) -lpthread $(OBJECT).o tif.o $(COMP).o thr_pool.o -o $(OBJECT) -lm -ltiff -lrt
 
-$(OBJECT).o: $(OBJECT).c tif.h avg.h sys_config.h
+$(OBJECT).o: $(OBJECT).c tif.h $(COMP).h sys_config.h
 	$(CC) $(CFLAGS) -c $(OBJECT).c -o $(OBJECT).o
 
 tif.o: tif.c tif.h sys_config.h
 	$(CC) $(CFLAGS) -c tif.c -o tif.o
 
-avg.o: avg.c avg.h sys_config.h
-	$(CC) $(CFLAGS) -c avg.c -o avg.o
+$(COMP).o: $(COMP).c $(COMP).h sys_config.h
+	$(CC) $(CFLAGS) -c $(COMP).c -o $(COMP).o
 
-#thr_pool.o: thr_pool.c thr_pool.h
-#	$(CC) $(CFALGS) -c thr_pool.c -o thr_pool.o
+thr_pool.o: thr_pool.c thr_pool.h
+	$(CC) $(CFALGS) -c thr_pool.c -o thr_pool.o
 
 tar: 
 	tar cvf *.c *.h makefile

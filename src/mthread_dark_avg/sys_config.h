@@ -1,5 +1,5 @@
-#ifndef SYS_CONFIG_H_
-#define SYS_CONFIG_H_
+#ifndef SYS_CONFIG_H
+#define SYS_CONFIG_H
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -14,7 +14,7 @@
 #define NUM_CORE		8
 #define NUM_BLADES		1
 
-#define MAX_THREAD              8       // maxium threads number, defined by the hardware
+#define MAX_THREAD              9       // maxium threads number, defined by the hardware
 #define BIT_PER_SAMPLE          16      // defined by camera property
 #define DEFAULT_THREADS_NUM     8       // default threads number
 
@@ -26,13 +26,14 @@ int NUM_THREADS, NUM_PROCESS_THREADS;	// threads number, number of processing th
 int NUM_PROCESS;			// process number
 
 uint16 *input_image, *output_image;
-uint16 **avg_buffer;
+uint16 **dk0;		// first dark image for recursive computation
+int16 **avg_buffer;	// set as int16 for avg method 3 computation
 uint16 **rms_buffer;
 int buffer_width, buffer_length;
 int buffer_size;
 int pages, page_size;
 
-// const char *output_filename[] = {"dark_avg.tif", "dark_rms.tif"};
+static const char *output_filename[] = {"dark_avg.tif", "dark_rms.tif"};
 
 int thread_status;	// threads status for hand shaking
 
@@ -46,20 +47,14 @@ pthread_mutex_t sel_mutex, init_mutex;
 struct timespec *start, *stop;
 double *accum;
 
+struct timespec tif_start, tif_stop;
+double tif_accum;
+
 /* arg for slave threads */
 typedef struct slave_thread_arg
 {
 	int tid;	// thread id
 	int pid;	// process id
 } slave_thread_arg;
-
-/* arg for tif thread */
-typedef struct tif_thread_arg
-{
-	int tid;	// thread id
-	int pid;	// process id
-	char **argv;
-
-} tif_thread_arg;
 
 #endif

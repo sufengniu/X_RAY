@@ -8,12 +8,10 @@
 *------------------------------------------------------*/
 #include "sys_config.h"
 #include "tif.h"	// tif loading thread
-#include "avg.h"	// dark average operation
+#include "avg_1.h"	// dark average operation
 //#include "thr_pool.h"
 
 /* add customized thread header file here */
-
-const char *output_filename[] = {"dark_avg.tif", "dark_rms.tif"};
 
 int main(int argc, char *argv[])
 {
@@ -53,14 +51,14 @@ int main(int argc, char *argv[])
 	printf("-- \tthreads number: %d\n", NUM_THREADS);
 	printf("-- \tprocess number: %d\n", NUM_PROCESS);
 	
-	NUM_PROCESS_THREADS = NUM_THREADS - 1;
+	NUM_PROCESS_THREADS = NUM_THREADS;
 	
 	/* pthread initial */
 	pthread_t *threads;
 	pthread_attr_t attr;
 	threads = (pthread_t *)malloc(NUM_THREADS * sizeof(pthread_t));
 	pthread_attr_init(&attr);
-	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);	
 	
 	struct slave_thread_arg *starg; // slave thread arguments	
 	
@@ -77,35 +75,39 @@ int main(int argc, char *argv[])
 * 
 */
 	/*------------------ tif loading ---------------------*/
-	clock_gettime(CLOCK_THREAD_CPUTIME_ID, start);
+	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tif_start);
 	
 	tif_load(argv+2);
-	clock_gettime(CLOCK_THREAD_CPUTIME_ID, stop);
+	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tif_stop);
 
-	accum[0] = (stop->tv_sec - start->tv_sec)+(double)(stop->tv_nsec-start->tv_nsec)/(double)BILLION;
-        printf("thread %d: done in %lf second\n", 0, accum[0]);
+	tif_accum = (tif_stop.tv_sec-tif_start.tv_sec)+(double)(tif_stop.tv_nsec-tif_start.tv_nsec)/(double)BILLION;
+        printf("master thread: done in %lf second\n", tif_accum);
 	
 	/*------------------ processing threads ---------------------*/	
 	/* malloc buffer for multiple sub threads */	
-	avg_buffer = (uint16 **)malloc(pages * sizeof(void *));
+	dk0 = (uint16 **)malloc(pages * sizeof(void *));
 	for(i = 0; i<NUM_PROCESS_THREADS; i++){
-		*(avg_buffer+i) = (uint16 *)malloc(buffer_length * buffer_width * NUM_PROCESS_THREADS * sizeof(uint16));
+		*(dk0+i) = (uint16 *)malloc(buffer_length * buffer_width * NUM_PROCESS_THREADS * sizeof(uint16));
+	}
+	avg_buffer = (int16 **)malloc(pages * sizeof(void *));
+	for(i = 0; i<NUM_PROCESS_THREADS; i++){
+		*(avg_buffer+i) = (int16 *)malloc(buffer_length * buffer_width * NUM_PROCESS_THREADS * sizeof(int16));
 	}
 	rms_buffer = (uint16 **)malloc(pages * sizeof(void *));
 	for(i = 0; i<NUM_PROCESS_THREADS; i++){
 		*(rms_buffer+i) = (uint16 *)malloc(buffer_length * buffer_width * NUM_PROCESS_THREADS * sizeof(uint16));
 	}
 	buffer_size = buffer_length * buffer_width;
-	printf("thread 0: buffer size is %d\n", buffer_size);
-	printf("thread 0: buffer length is %d, buffer width is %d\n", buffer_length, buffer_width);
+	printf("master thread: buffer size is %d\n", buffer_size);
+	printf("master thread: buffer length is %d, buffer width is %d\n", buffer_length, buffer_width);
 
 	/* assign thread number from 1 to NUM_PROCESS_THREADS */
-	printf("thread 0: create %d processing threads\n", NUM_PROCESS_THREADS);
+	printf("master thread: create %d processing threads\n", NUM_PROCESS_THREADS);
 	for (i = 0; i<NUM_PROCESS_THREADS; i++){
-		starg[i].tid = i+1;
+		starg[i].tid = i;
 		starg[i].pid = 0;
 		
-		rc = pthread_create(&threads[i+1], &attr, avg, (void *)(starg+i));
+		rc = pthread_create(&threads[i], &attr, rms, (void *)(starg+i));
 		if (rc){
 			printf("Error: return code from pthread_create() is %d\n", rc);
 			exit(1);
@@ -114,12 +116,12 @@ int main(int argc, char *argv[])
 	
 	/* wait for all threads complete */
 	for (i = 0; i<NUM_PROCESS_THREADS; i++){
-		pthread_join(threads[i+1], &status);
+		pthread_join(threads[i], &status);
 	}
 	
 	/*------------------ tif -----------------------*/
-	printf("thread 0: synthesis multiple chunks \n");
-	printf("thread 0: writing processed image to dark_avg.tif file \n");
+	printf("master thread: synthesis multiple chunks \n");
+	printf("master thread: writing processed image to %s file \n", output_filename[0]);
 	tif_syn();
 
 	/* Clean up and exit */
@@ -130,6 +132,11 @@ int main(int argc, char *argv[])
 	free(start);
 	free(stop);
 	free(accum);
+	
+	for (i = 0; i < NUM_PROCESS_THREADS; i++){
+		free(dk0[i]);
+	}
+	free(dk0);
 	
 	for (i = 0; i < NUM_PROCESS_THREADS; i++){
 		free(rms_buffer[i]);

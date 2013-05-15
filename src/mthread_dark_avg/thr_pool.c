@@ -4,7 +4,7 @@
  */
 
 #if !defined(_REENTRANT)
-#define    _REENTRANT
+#define	_REENTRANT
 #endif
 
 #include "thr_pool.h"
@@ -46,7 +46,7 @@ typedef struct thr_pool {
 	job_t			*pool_tail;    /* tail of FIFO job queue */
 	pthread_attr_t		pool_attr;    /* attributes of the workers */
 	int			pool_flags;    /* see below */
-	uint_t			pool_linger;    /* seconds before idle workers exit */
+	int			pool_linger;    /* seconds before idle workers exit */
 	int			pool_minimum;    /* minimum number of worker threads */
 	int			pool_maximum;    /* maximum number of worker threads */
 	int			pool_nthreads;    /* current number of worker threads */
@@ -143,7 +143,7 @@ worker_thread(void *arg)
     job_t *job;
     void *(*func)(void *);
     active_t active;
-    timestruc_t ts;
+    struct timespec ts;
 
     /*
      * This is the worker's main loop.  It will only be left
@@ -257,7 +257,7 @@ clone_attributes(pthread_attr_t *new_attr, pthread_attr_t *old_attr)
 }
 
 thr_pool_t *
-thr_pool_create(uint_t min_threads, uint_t max_threads, uint_t linger,
+thr_pool_create(int min_threads, int max_threads, int linger,
     pthread_attr_t *attr)
 {
     thr_pool_t    *pool;

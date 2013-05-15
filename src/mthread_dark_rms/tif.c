@@ -133,7 +133,7 @@ int tif_syn(){
 
 	TIFF *tif;
 		
-	if((tif = TIFFOpen("dark_avg.tif", "w")) == NULL){
+	if((tif = TIFFOpen(output_filename[0], "w")) == NULL){
 		printf("Open output tif file for writing failed!\n");
 		exit(0);
 	}	
