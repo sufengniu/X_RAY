@@ -73,8 +73,13 @@ int tif_load(char **argv)
 		exit(42);
 	}
 
-	if((output_image = (uint16 *)_TIFFmalloc(info->image_size)) == NULL){
-		printf("Could not allocate enough memory for output image!\n");
+	if((output_image_avg = (uint16 *)_TIFFmalloc(info->image_size)) == NULL){
+		printf("Could not allocate enough memory for dark average output image!\n");
+		exit(0);
+	}
+
+	if((output_image_std = (uint16 *)_TIFFmalloc(info->image_size)) == NULL){
+		printf("Could not allocate enough memory for standard derivation output image!\n");
 		exit(0);
 	}
 
@@ -138,7 +143,7 @@ int tif_syn(){
 		exit(0);
 	}	
 	
-	printf("\tsetting tif parameters\n");
+	printf("\tsetting %s tif parameters\n", output_filename[0]);
 	TIFFSetField(tif, TIFFTAG_IMAGELENGTH, info->length);
 	TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, info->width);
 	TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, info->bps);
@@ -151,19 +156,50 @@ int tif_syn(){
 		exit(0);
 	}
 	
-	printf("\twriting tif images...\n");
+	printf("\twriting %s images...\n", output_filename[0]);
 	
 	for (r = 0; r < info->length; r++){
 		for (c = 0; c < info->width; c++){	
-			*(scanline + c) = output_image[info->width * r + c];
+			*(scanline + c) = output_image_avg[info->width * r + c];
 		}
 		TIFFWriteScanline(tif, scanline, r, s);
 	}
 
-	printf("\twriting image done!\n");
+	printf("\twriting %s image done!\n", output_filename[0]);
 	_TIFFfree(scanline);
 	TIFFClose(tif);
-	
+
+	if((tif = TIFFOpen(output_filename[1], "w")) == NULL){
+		printf("Open output tif file for writing failed!\n");
+		exit(0);
+	}
+
+	printf("\tsetting %s parameters\n", output_filename[1]);
+	TIFFSetField(tif, TIFFTAG_IMAGELENGTH, info->length);
+	TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, info->width);
+	TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, info->bps);
+	TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, info->spp);
+	TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, info->photo_metric);
+	TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+
+	if((scanline = (uint16 *)_TIFFmalloc(info->width * info->length * sizeof(uint16))) == NULL){
+		printf("Could not allocate enough memory for the scan buffer!\n");
+		exit(0);
+	}
+
+	printf("\twriting %s tif images...\n", output_filename[1]);
+
+	for (r = 0; r < info->length; r++){
+		for (c = 0; c < info->width; c++){
+			*(scanline + c) = output_image_std[info->width * r + c];
+		}
+		TIFFWriteScanline(tif, scanline, r, s);
+	}
+
+	printf("\twriting %s image done!\n", output_filename[1]);
+	_TIFFfree(scanline);
+	TIFFClose(tif);
+
 	return 0;
 }
 

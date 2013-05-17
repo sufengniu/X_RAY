@@ -3,7 +3,7 @@
 # Company: Argonne National Lab
 
 CC=gcc
-CFLAGS=-g -O3
+CFLAGS=-g
 OBJECT=mthreads_dark_rms
 COMP=rms
 
@@ -30,4 +30,4 @@ tar:
 	tar cvf *.c *.h makefile
 
 clean:
-	rm -rf *.o $(OBJECT) dark_avg.tif *.tar
+	rm -rf *.o $(OBJECT) dark_avg.tif dark_rms.tif *.tar

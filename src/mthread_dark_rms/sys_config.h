@@ -25,7 +25,7 @@
 int NUM_THREADS, NUM_PROCESS_THREADS;	// threads number, number of processing threads
 int NUM_PROCESS;			// process number
 
-uint16 *input_image, *output_image;
+uint16 *input_image, *output_image_avg, *output_image_std;
 uint16 **dk0;		// first dark image for recursive computation
 int16 **avg_buffer;	// set as int16 for avg method 3 computation
 uint16 **rms_buffer;

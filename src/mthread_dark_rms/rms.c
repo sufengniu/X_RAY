@@ -68,7 +68,7 @@ int rms_op(int tid)
 		}
 	}
 	
-	for (k = 0; k < pages; k++){
+	for (k = 1; k < pages; k++){
 					
 		for (i = 0; i<buffer_length; i++){
 			for (j = 0; j<buffer_width; j++){
@@ -91,6 +91,7 @@ int rms_op(int tid)
 int image_syn(int tid){
 	int i, j;
 	long int image_index = 0;
+	int avg_diff_sq;
 	int avg_diff;
 	int rms_sq;
 	int temp_value;
@@ -100,16 +101,18 @@ int image_syn(int tid){
 			image_index = j + i * buffer_width + tid * buffer_size;
 			
 			/* caculate in recursive method 3 */
+			// DKstd = sqrt(A2-(A1^2/numDark)/(numDark-1))
+			avg_diff_sq = pow(avg_buffer[tid][j+i*buffer_width], 2);	// overflow may happen
+			temp_value = avg_diff_sq / pages;
+			rms_sq = (rms_buffer[tid][j+i*buffer_width] - temp_value) / (pages - 1);
+			*(*(rms_buffer + tid) + j + i * buffer_width) = sqrt(rms_sq);
+	
+			output_image_std[image_index] = *(*(rms_buffer + tid) + j + i * buffer_width);
+
 			// DKavg = A1/numDark + dk0
 			avg_diff = *(*(avg_buffer + tid) + j + i * buffer_width) / pages;
 			*(*(avg_buffer + tid) + j + i * buffer_width) = avg_diff + *(*(dk0 + tid) + j + i * buffer_width);
-			
-			// DKstd = sqrt(A2-(A1^2/numDark)/(numDark-1))
-			temp_value = pow(*(*(avg_buffer + tid) + j + i * buffer_width), 2) / pages;
-			rms_sq = (*(*(rms_buffer + tid) + j + i * buffer_width) - temp_value) / (pages - 1);
-			*(*(rms_buffer + tid) + j + i * buffer_width) = sqrt(rms_sq);
-	
-			output_image[image_index] = *(*(rms_buffer + tid) + j + i * buffer_width);
+			output_image_avg[image_index] = *(*(avg_buffer + tid) + j + i * buffer_width);
 		}
 	}
 	return 0;

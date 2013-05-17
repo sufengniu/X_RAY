@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 	
 	/*------------------ tif -----------------------*/
 	printf("master thread: synthesis multiple chunks \n");
-	printf("master thread: writing processed image to %s file \n", output_filename[0]);
+	printf("master thread: writing processed image to %s file \n", output_filename[1]);
 	tif_syn();
 
 	/* Clean up and exit */
@@ -149,7 +149,8 @@ int main(int argc, char *argv[])
 	free(avg_buffer);
 
 	tif_release(input_image);
-	tif_release(output_image);
+	tif_release(output_image_avg);
+	tif_release(output_image_std);
 
 	pthread_exit(NULL);		
 	return 0;
