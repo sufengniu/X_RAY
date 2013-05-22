@@ -18,51 +18,42 @@
 /**
  * for cummulative summing images. maine will do ONE cumm. sum. Have input data, ,
  *  and stored sum data. 
- 
- 
  */
 class imgcomp_exe: public t_executable
 {
 public:
 
-   //id of this job... 
-    int id;
+	// thread id and process id of this job... 
+	int tid, pid;
   
+	imgcomp_exe();
    
-   
+	void maine(void);
     
-    imgcomp_exe();
-    
-    
-    
-    void maine(void);
-    
-    void setParams(
-    	int threshold, 
+	void setParams(
+	int threshold, 
 	int numpix, 
 	int offs,
 	unsigned short* indata,
 	unsigned short* darkdata,
 	unsigned short* outdatas);
 	
-    
- private:
+private:
  
-    //outdata
-    unsigned short *imgouts;
+	// outdata
+	unsigned short *imgouts;
   
-    //
-    unsigned short *imgin;
- 	//
-    unsigned short *imgdark;
+	unsigned short *imgin;
+
+	unsigned short *imgdark;
    
-   // number of pixels to compute
-   int npixels;
+	// number of pixels to compute
+	int npixels;
    
-   int thr;
-   unsigned long address;
+	int thr;
+	unsigned long address;
    
-   unsigned long mem_offset;
+	unsigned long mem_offset;
    
  
     

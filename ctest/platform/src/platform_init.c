@@ -1,11 +1,8 @@
-#include "init.h"
+#include "../include/platform_init.h"
 
 
 void hw_info(){
 
-	printf("---------------------------------------------\n");
-	printf("---- X-ray camera dark average operation ----\n");
-	printf("---------------------------------------------\n");
 	printf("-- hardware information: \n");
 	printf("-- \tcore number: %d\n", NUM_CORE);
 	printf("-- \tblades number: %d\n", NUM_BLADES);
@@ -15,15 +12,16 @@ void hw_info(){
 	
 }
 
-
-
-int mem_alloc(){
+void thr_mem_alloc(){
+	int i;	
 	
 	/* setup to measure threads time */
 	start = (struct timespec *)malloc(NUM_THREADS * sizeof(struct timespec));
 	stop = (struct timespec *)malloc(NUM_THREADS * sizeof(struct timespec));
 	accum = (double *)malloc(NUM_THREADS * sizeof(double));
-
+	
+	starg = (struct slave_thread_arg *)malloc(NUM_PROCESS_THREADS * sizeof(struct slave_thread_arg));
+	
 	/* malloc buffer for multiple sub threads */
 	dk0 = (uint16 **)malloc(pages * sizeof(void *));
 	for(i = 0; i<NUM_PROCESS_THREADS; i++){
@@ -55,15 +53,13 @@ int mem_alloc(){
 		printf("Could not allocate enough memory for standard derivation output image!\n");
 		exit(0);
 	}
-
-	return 1;
 }
 
-void mem_free(){
+void thr_mem_free(){
+	int i;
+
 	/* Clean up and exit */
 	printf("-- free memory space and clean up \n");
-	pthread_attr_destroy(&attr);
-	free(threads);
 	free(starg);
 	free(start);
 	free(stop);
@@ -86,6 +82,6 @@ void mem_free(){
 
 	tif_release(input_image);
 	tif_release(output_image_avg);
-	tif_release(output_image_std)
+	tif_release(output_image_std);
 	
 }

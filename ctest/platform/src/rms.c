@@ -1,6 +1,6 @@
 
 /* root mean square thread */
-#include "rms.h"
+#include "../include/rms.h"
 
 /*
 *
@@ -32,7 +32,7 @@ void *rms(void *arg)
 	printf("thread %d: writing to output_image\n", tid);
 	image_syn(tid);
 
-	pthread_exit(NULL);
+	//pthread_exit(NULL);
 }
 
 /* initialization to 0 for each pixel */

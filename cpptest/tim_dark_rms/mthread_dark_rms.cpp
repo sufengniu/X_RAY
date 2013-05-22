@@ -1,11 +1,3 @@
-/*------------------------------------------------------
- * FILE: t_test.cpp
- * DESCRIPTION: 
- *  
- * 
- * AUTHOR: Sufeng Niu 
- * LAST REVISED: 
- *------------------------------------------------------*/
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -22,9 +14,7 @@
 #include "count_exe.h"
 #include "imgave_exe.h"
 #include "imgcomp_exe.h"
-
 #include "sys_config.h"
-#include "platform_init.h"
 #include "tif.h"
 #include "rms.h"
 
@@ -34,19 +24,16 @@ int _tmain(int argc, _TCHAR* argv[])
 int main( int argc, const char* argv[] )
 #endif
 {
-
-	//declare a threadpool
-	t_threadpool tp;
-
-	//declare 16 executables as pointers, so we can have up to 16 threads doing something
-	t_executable *a[NUM_CORE];
-
-	//some counter...
-	int i, j;
-
+/*
+ * initialization threads and parameters definition
+ */	
+	int i, j;	
+	
 	NUM_THREADS = DEFAULT_THREADS_NUM;	// defined in sys_config.h	
 	NUM_PROCESS = NUM_BLADES;
 	
+
+
 	if (argc == 3){
 		NUM_THREADS = atoi(argv[1]);
 	} else{
@@ -62,7 +49,45 @@ int main( int argc, const char* argv[] )
 		exit(1);
 	}
 	
+	printf("---------------------------------------------\n");
+	printf("---- X-ray camera dark average operation ----\n");
+	printf("---------------------------------------------\n");
+	printf("-- hardware information: \n");
+	printf("-- \tcore number: %d\n", NUM_CORE);
+	printf("-- \tblades number: %d\n", NUM_BLADES);
+	printf("-- software definition: \n");
+	printf("-- \tthreads number: %d\n", NUM_THREADS);
+	printf("-- \tprocess number: %d\n", NUM_PROCESS);
+	
 	NUM_PROCESS_THREADS = NUM_THREADS;
+
+	//declare a threadpool
+	t_threadpool tp;
+
+	//declare 16 executables as pointers, so we can have up to 16 threads doing something
+	t_executable *a[16];
+
+	if (argc==1)
+	printf("Running defaults\n");
+
+	// you can tell how many threads to run from command line: t_test 6 for 6 threads. Defaults to 8 w/out args
+	if (argc>1)
+		NUM_THREADS=atoi(argv[1]);
+
+	// on command line, give 2nd arg for which alg to run. def to averaging.
+	int ALGORITHM=0;
+
+	if (argc>2)
+		if (strcmp("comp",argv[2])==0)
+		{
+			printf("Running compression\n");
+			ALGORITHM=1;
+		}
+		else
+		{
+			printf("Running averaging\n");
+			ALGORITHM=0;
+		}
 	
 	int nt=0;
 
@@ -72,7 +97,6 @@ int main( int argc, const char* argv[] )
 	int NAVE=16;
 	timeval tim;
 
-	
 	//image mem size
 	int memsize=1024*1024;
 
@@ -95,16 +119,20 @@ int main( int argc, const char* argv[] )
 
 	// create objects for each job to run, t_executable objhects.
 	// these objects will be passed to the threads. 
-	for ( j=0; j<NUM_THREADS; j++)
+	for ( j=0;j<NUM_THREADS;j++)
 	{
-		a[j] = new imgcomp_exe();
+
+		if (ALGORITHM==0)
+			a[j] = new imgave_exe();
+  		else
+			a[j] = new imgcomp_exe();
 	}
 
 /*
  * this is a hack. we put a few extra threads in the pool.  don't know why,but it works better.
  * cygwin sometimes runs out of threads for some reason...
  */
-	tp.fillPool(NUM_THREADS+2);
+  tp.fillPool(NUM_THREADS+2);
 
 	while(nt<NTESTS)
 	{
@@ -127,13 +155,22 @@ int main( int argc, const char* argv[] )
 
 			a[j]->id = j+1;
   
-			((imgcomp_exe*)a[j])->setParams(
-			0,//threshold
-			NPIX,
-			memskip*j,//offset
-			&(a_in[memskip*j]),
-			&(a_incpy[memskip*j]),
-			&(a_outcpy[memskip*j]));
+			if (ALGORITHM==0)
+				((imgave_exe*)a[j])->setParams(
+				NAVE,
+				NPIX,
+				&(a_in[memskip*j]),
+				&(a_sum[memskip*j]),
+				&(a_sumsq[memskip*j]),
+				&(a_outcpy[memskip*j]));
+			else
+   				((imgcomp_exe*)a[j])->setParams(
+				0,//threshold
+				NPIX,
+				memskip*j,//offset
+				&(a_in[memskip*j]),
+				&(a_incpy[memskip*j]),
+				&(a_outcpy[memskip*j]));
 		}
  
 /*

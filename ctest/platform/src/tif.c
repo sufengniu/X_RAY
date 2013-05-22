@@ -1,5 +1,5 @@
 
-#include "tif.h"
+#include "../include/tif.h"
 
 struct tiff_info *info;
 
@@ -71,7 +71,17 @@ int tif_load(char **argv)
 	if((input_image = (uint16 *)_TIFFmalloc(data_size)) == NULL){
 		fprintf(stderr, "Could not allocate enough memory for the uncompressed image!\n");
 		exit(42);
-	}	
+	}
+
+	if((output_image_avg = (uint16 *)_TIFFmalloc(info->image_size)) == NULL){
+		printf("Could not allocate enough memory for dark average output image!\n");
+		exit(0);
+	}
+
+	if((output_image_std = (uint16 *)_TIFFmalloc(info->image_size)) == NULL){
+		printf("Could not allocate enough memory for standard derivation output image!\n");
+		exit(0);
+	}
 
 	if((scanline = (uint16 *)_TIFFmalloc(info->line_size)) == NULL){
 		fprintf(stderr, "Could not allocate enough memory for the scan buffer!\n");
@@ -141,7 +151,7 @@ int tif_syn(){
 	TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, info->photo_metric);
 	TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
 	
-	if((scanline = (uint16 *)_TIFFmalloc(info->line_size)) == NULL){
+	if((scanline = (uint16 *)_TIFFmalloc(info->width * info->length * sizeof(uint16))) == NULL){
 		printf("Could not allocate enough memory for the scan buffer!\n");
 		exit(0);
 	}
@@ -172,7 +182,7 @@ int tif_syn(){
 	TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, info->photo_metric);
 	TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
 
-	if((scanline = (uint16 *)_TIFFmalloc(info->line_size)) == NULL){
+	if((scanline = (uint16 *)_TIFFmalloc(info->width * info->length * sizeof(uint16))) == NULL){
 		printf("Could not allocate enough memory for the scan buffer!\n");
 		exit(0);
 	}

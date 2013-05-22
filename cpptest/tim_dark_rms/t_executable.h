@@ -1,5 +1,4 @@
                
-
 #ifndef WIN32
 #include <unistd.h>
 #else
@@ -24,12 +23,11 @@
 
 class t_executable
 {
-  public:
+	public:
   	int id;
-    	virtual void maine();
+	virtual void maine();
     	
-
-    	t_executable();
+	t_executable();
     	
 };
 

@@ -12,7 +12,7 @@ INCLUDE_PATH = include/
 
 # Flags
 CC=gcc
-CFLAGS=-g -O3 -I/include -I/lib
+CFLAGS=-g -I/include -I/lib
 
 TARGET=mthreads_dark_rms
 SOURCE=tif

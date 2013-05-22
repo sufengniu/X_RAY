@@ -11,20 +11,12 @@
 
 #define BILLION 1000000000L;
 
-/*
-* hardware information
-* NUM_CORE is threads number on a single blade
-* if the thread number is greater than NUM_CORE, the main thread will lanuch MPI library
-* by using multiple blades for scalable purpose, the system will run as mixed MPI and
-* multi-thread mode
-*/
 #define NUM_CORE		8
 #define NUM_BLADES		1
 
-#define MAX_THREAD              100	// maxium threads number, defined by the hardware
+#define MAX_THREAD              9       // maxium threads number, defined by the hardware
+#define BIT_PER_SAMPLE          16      // defined by camera property
 #define DEFAULT_THREADS_NUM     8       // default threads number
-
-#define BIT_PER_SAMPLE          16	// defined by camera property
 
 /* image tag, tif.c need to be modefied */
 #define LENGTH                  2000
@@ -39,7 +31,6 @@ uint16 **dk0;		// first dark image for recursive computation
 int16 **avg_buffer;	// set as int16 for avg method 3 computation
 uint16 **rms_buffer;
 
-/* image parameters */
 int buffer_width, buffer_length;
 int buffer_size;
 int pages, page_size;
@@ -60,5 +51,6 @@ typedef struct slave_thread_arg
 	int tid;	// thread id
 	int pid;	// process id
 } slave_thread_arg;
+struct slave_thread_arg *starg; // slave thread arguments
 
 #endif
