@@ -1,6 +1,13 @@
 
 this is prototype code for X-ray camera data preprocessing based on ATCA chassis
 
+notes: 
+1.
+
+2. when choosing tif file mode, the tif file need to be combined into one image,
+you can achieve it by using imageJ:import->image sequence->file->save as->TIFF...
+
+
 project file structure
 .
 |-- include

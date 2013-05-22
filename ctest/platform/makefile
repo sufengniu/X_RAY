@@ -49,7 +49,7 @@ $(OBJ_PATH)%.o: $(SRC_PATH)%.c $(DEPS)
 
 tar: 
 	@echo "compress the project"
-	tar cvf *.c *.h lib/ makefile
+	tar cvf src/ include/ lib/ obj/ makefile readme
 
 clean:
 	rm -rf $(OBJ_PATH)*.o *.a $(TARGET) dark_avg.tif dark_rms.tif *.tar

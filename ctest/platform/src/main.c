@@ -1,25 +1,28 @@
 /*------------------------------------------------------
-* FILE: main.c
-* DESCRIPTION: 
-*  
-* 
-* AUTHOR: Sufeng Niu 
-* LAST REVISED: 
-*------------------------------------------------------*/
+ * FILE: main.c
+ * DESCRIPTION: 
+ *  
+ * 
+ * AUTHOR: Sufeng Niu 
+ * LAST REVISED: 
+ *------------------------------------------------------*/
 #include "../include/sys_config.h"
 #include "../include/platform_init.h"
 #include "../lib/thr_pool.h"
+#include "../include/dark_mode.h"
+#include "../include/data_mode.h"
 
 /* add customized function thread header file here */
-#include "../include/tif.h"	// tif loading thread
-#include "../include/rms.h"	// dark average operation
+#include "../include/tif.h"	// tif loading thread, dark mode operation
+#include "../include/rms.h"	// dark average operation, dark mode operation
+#include "../include/sub.h"	// image subtraction, data mode operation
 
 int main(int argc, char *argv[])
 {
 
 /*
-* initiliazation, parameters definition
-*/
+ * initiliazation, parameters definition
+ */
 	char mode, source;
 	printf("=============================================\n");
 	printf("---------------------------------------------\n");
@@ -29,6 +32,7 @@ int main(int argc, char *argv[])
 	printf("-- Application: X-ray data pre-processing\n");
 	printf("-- Description: \n");
 	printf("=============================================\n\n");
+	printf("Type Ctr+c to quit\n");	
 	printf("Please select mode: 1.dark mode; 2.data mode\n");
 	printf("-- Usage: type 1 and 2 to select\n");
 	printf("-- Dark mode: dark image average and root mean square operation\n");
@@ -63,7 +67,9 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 
-	
+	printf("Process and threads setup:\n");
+	printf("-- Default configuration:\n");
+	printf("-- ")	
 
 	NUM_THREADS = DEFAULT_THREADS_NUM;	// defined in sys_config.h	
 	NUM_PROCESS = NUM_BLADES;
@@ -91,11 +97,11 @@ int main(int argc, char *argv[])
 		
 	
 /*
-* the main thread will launch NUM_THREADS-2 subthreads when using UDP
-* 1 thread for UDP read and 1 thread for UDP write, when reading based
-* on tif library, tif function will be implemented in main, since it has
-* no timing issues.
-*/
+ * the main thread will launch NUM_THREADS-2 subthreads when using UDP
+ * 1 thread for UDP read and 1 thread for UDP write, when reading based
+ * on tif library, tif function will be implemented in main, since it has
+ * no timing issues.
+ */
 	/*------------------ tif loading ---------------------*/
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tif_start);
 	
