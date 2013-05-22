@@ -5,9 +5,9 @@
 clear
 clc
 % common setup for all 3 methods
-filename = '55Fe_run6_dark.tif';
+filename = '55Fe_run5_dark.tif';
 firstDark = 1;
-lastDark = 45;
+lastDark = 44;
 numDark = lastDark - firstDark + 1;
 % end of setup
 
@@ -65,7 +65,7 @@ DKstd3=sqrt((double(A2)-(A1.^2/double(numDark)))/double(numDark-1));
 minDKave = min([min(DKave1(:)) min(DKave2(:)) min(DKave3(:))]);
 maxDKave = max([max(DKave1(:)) max(DKave2(:)) max(DKave3(:))]);
 minDKstd = min([min(DKstd1(:))  min(DKstd3(:))]);
-maxDKstd = max([max(DKstd1(:))  max(DKstd3(:))]);
+maxDKstd = max([max(DKstd1(:))]);
 
 figure(1);
 subplot(2,2,1)
