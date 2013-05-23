@@ -1,5 +1,5 @@
 #include "imgcomp_exe.h"
-#include <math.h>
+#include "rms.h"
     
 imgcomp_exe::imgcomp_exe()
 {
@@ -13,7 +13,8 @@ void imgcomp_exe::maine(void)
 	unsigned short st_val;
 	unsigned long int *adrx;
 	address=0;
-	       
+	
+	/*       
 	for (k=0;k<npixels;k++)
 	{
 		int t=thr + imgdark[k];
@@ -27,7 +28,9 @@ void imgcomp_exe::maine(void)
 		*adrx=k+mem_offset;
 		address+=2;
 		imgouts[address]=st_val;     
-       }
+       }*/
+
+	rms
 }
 	
 void imgcomp_exe::setParams(

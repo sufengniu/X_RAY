@@ -73,16 +73,6 @@ int tif_load(char **argv)
 		exit(42);
 	}
 
-	if((output_image_avg = (uint16 *)_TIFFmalloc(info->image_size)) == NULL){
-		printf("Could not allocate enough memory for dark average output image!\n");
-		exit(0);
-	}
-
-	if((output_image_std = (uint16 *)_TIFFmalloc(info->image_size)) == NULL){
-		printf("Could not allocate enough memory for standard derivation output image!\n");
-		exit(0);
-	}
-
 	if((scanline = (uint16 *)_TIFFmalloc(info->line_size)) == NULL){
 		fprintf(stderr, "Could not allocate enough memory for the scan buffer!\n");
 		exit(42);

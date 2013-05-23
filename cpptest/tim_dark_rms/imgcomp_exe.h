@@ -54,8 +54,7 @@ private:
 	unsigned long address;
    
 	unsigned long mem_offset;
-   
- 
     
 };
+
 #endif

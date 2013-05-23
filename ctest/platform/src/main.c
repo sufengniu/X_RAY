@@ -24,6 +24,8 @@ int main(int argc, char *argv[])
  * initiliazation, parameters definition
  */
 	char mode, source;
+	char config_sel;
+
 	printf("=============================================\n");
 	printf("---------------------------------------------\n");
 	printf("---- X-ray camera dark average operation ----\n");
@@ -69,7 +71,21 @@ int main(int argc, char *argv[])
 
 	printf("Process and threads setup:\n");
 	printf("-- Default configuration:\n");
-	printf("-- ")	
+	printf("-- \n");
+	printf("Using default configuration? y or n");
+	
+	scanf("%c", &config_sel);
+	if ( config_sel == 'y' || config_sel == 'Y'){
+		
+	}
+	else if( config_sel == 'n' || config_sel == 'N'){
+		
+		
+	}
+	else {
+		printf("configuration selection is illeagle!\n");
+		exit(0);
+	}
 
 	NUM_THREADS = DEFAULT_THREADS_NUM;	// defined in sys_config.h	
 	NUM_PROCESS = NUM_BLADES;

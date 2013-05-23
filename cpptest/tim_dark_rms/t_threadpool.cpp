@@ -1,6 +1,5 @@
 
 #include "t_threadpool.h"
-
     
     void t_threadpool::fillPool(int N)
     {

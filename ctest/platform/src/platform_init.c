@@ -23,21 +23,21 @@ void thr_mem_alloc(){
 	starg = (struct slave_thread_arg *)malloc(NUM_PROCESS_THREADS * sizeof(struct slave_thread_arg));
 	
 	/* malloc buffer for multiple sub threads */
-	dk0 = (uint16 **)malloc(pages * sizeof(void *));
+	dk0 = (uint16 **)malloc(NUM_PROCESS_THREADS * sizeof(void *));
 	for(i = 0; i<NUM_PROCESS_THREADS; i++){
 		if((*(dk0+i) = (uint16 *)malloc(buffer_length * buffer_width * NUM_PROCESS_THREADS * sizeof(uint16))) == NULL){
 			printf("Could not allocate enough memory for dk0!\n");
 			exit(0);
 		}
 	}
-	avg_buffer = (int16 **)malloc(pages * sizeof(void *));
+	avg_buffer = (int16 **)malloc(NUM_PROCESS_THREADS * sizeof(void *));
 	for(i = 0; i<NUM_PROCESS_THREADS; i++){
 		if((*(avg_buffer+i) = (int16 *)malloc(buffer_length * buffer_width * NUM_PROCESS_THREADS * sizeof(int16))) == NULL){
 			printf("Could not allocate enough memory for avg_buffer!\n");
 			exit(0);
 		}
 	}
-	rms_buffer = (uint16 **)malloc(pages * sizeof(void *));
+	rms_buffer = (uint16 **)malloc(NUM_PROCESS_THREADS * sizeof(void *));
 	for(i = 0; i<NUM_PROCESS_THREADS; i++){
 		if((*(rms_buffer+i) = (uint16 *)malloc(buffer_length * buffer_width * NUM_PROCESS_THREADS * sizeof(uint16))) == NULL){
 			printf("Could not allocate enough memory for rms_buffer!\n");

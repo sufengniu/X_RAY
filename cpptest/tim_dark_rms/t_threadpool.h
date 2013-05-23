@@ -25,26 +25,24 @@ class t_threadpool
 {
 public:
 
-    //list of t_threads
-    t_thread *threadlist[64];
-    int num_threads;
-    
-    
-    // call to create N threads for the pool.
-    void fillPool(int N);
+	//list of t_threads
+	t_thread *threadlist[64];
+	int num_threads;
+        
+	// call to create N threads for the pool.
+	void fillPool(int N);
 
 	//grab a thread that is not busy
-    t_thread* getFreeThread(void);
-
+	t_thread* getFreeThread(void);
 
 	//start the job for the said t_executable
-    void startJob(t_executable *executable_x);
+	void startJob(t_executable *executable_x);
             
-	  // put thread back into free list.
-    void recycle(void);
+	// put thread back into free list.
+	void recycle(void);
     
-    // wait for threads to finish up.
-    void synchronize(void);
+	// wait for threads to finish up.
+	void synchronize(void);
         
 };
 

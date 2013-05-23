@@ -18,27 +18,20 @@
 
 /**
  * for cummulative summing images. maine will do ONE cumm. sum. Have input data, ,
- *  and stored sum data. 
- 
- 
+ *  and stored sum data.  
  */
 class imgave_exe: public t_executable
 {
 public:
 
-   //id of this job... 
-    int id;
-  
-   
-   
+	//id of this job... 
+	int id;
+
+	imgave_exe();
     
-    imgave_exe();
+	void maine(void);
     
-    
-    
-    void maine(void);
-    
-    void setParams(
+	void setParams(
     	int naverages, 
 	int numpix, 
 	unsigned short* indata,
@@ -47,27 +40,23 @@ public:
 	unsigned short* outdatas);
 	
     
- private:
+private:
+   	//summed data
+	double *imgsum;
+	//outdata
+	unsigned short *imgouts;
+	//summed data
+	double *imgsumsq;
+
+	unsigned short *imgin;
+	//number of imgs to averate
+	unsigned short numave;
    
-    //summed data
-    double *imgsum;
-    //outdata
-    unsigned short *imgouts;
-    //summed data
-    double *imgsumsq;
-    //
-    unsigned short *imgin;
-    //number of imgs to averate
-    unsigned short numave;
+	// number of pixels to compute
+	int npixels;
    
-   // number of pixels to compute
-   int npixels;
-   
-   
-   int avecnt;
-   double avecoef;
-   
- 
-    
+	int avecnt;
+	double avecoef;
 };
+
 #endif
