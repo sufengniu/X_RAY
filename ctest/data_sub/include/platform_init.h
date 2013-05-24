@@ -6,7 +6,9 @@
 #include "sys_config.h"
 
 void hw_info();
-void mem_alloc();
-void mem_free();
+void dk_mem_alloc();	// dark image
+void dt_mem_alloc();	// data image
+void dk_mem_free();
+void dt_mem_free();
 
 #endif /* platform_init.h */

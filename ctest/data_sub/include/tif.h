@@ -17,7 +17,12 @@ typedef struct tiff_info{
         uint16 config;
 } tiff_info;
 
-int tif_load(char **argv);
+TIFF *tif;
+uint32 data_size;
+unsigned long image_offset;
+
+int tif_info(char **argv);
+int tif_load();
 void tif_release(uint16 *image);
 int tif_syn();
 

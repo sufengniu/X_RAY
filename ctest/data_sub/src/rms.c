@@ -16,7 +16,7 @@ void *rms(void *arg)
 	printf("thread %d: actived\n", tid);
 
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, start + tid);	
-	init(tid);
+	rms_init(tid);
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, stop + tid);
 	accum[tid] = ((stop+tid)->tv_sec - (start+tid)->tv_sec)+(double)((stop+tid)->tv_nsec - (start+tid)->tv_nsec)/(double)BILLION;
 	printf("thread %d: initial done in %lf second\n", tid, accum[tid]);
@@ -27,16 +27,15 @@ void *rms(void *arg)
 
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, stop + tid);
 	accum[tid] = ((stop+tid)->tv_sec - (start+tid)->tv_sec)+(double)((stop+tid)->tv_nsec - (start+tid)->tv_nsec)/(double)BILLION;
-	printf("thread %d: done in %lf second\n", tid, accum[tid]);
+	printf("thread %d: average computation done in %lf second\n", tid, accum[tid]);
 	
-	printf("thread %d: writing to output_image\n", tid);
 	image_syn(tid);
 
 	//pthread_exit(NULL);
 }
 
 /* initialization to 0 for each pixel */
-int init(int tid)
+int rms_init(int tid)
 {
 	int i, j;	// i: column, j: row
 	
@@ -82,8 +81,6 @@ int rms_op(int tid)
 			}
 		}
 	}
-
-	printf("thread %d: average computation done\n", tid);
 
 	return 0;
 }

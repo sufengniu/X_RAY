@@ -18,6 +18,9 @@
 #define BIT_PER_SAMPLE          16      // defined by camera property
 #define DEFAULT_THREADS_NUM     8       // default threads number
 
+#define alpha			3	// between [0, 4]
+#define beta			15	// between [0, 20]
+
 /* image tag, tif.c need to be modefied */
 #define LENGTH                  2000
 #define WIDTH                   1152
@@ -33,13 +36,16 @@ uint16 **rms_buffer;
 
 /* data image mem and buffer address */
 uint16 *data_image;
+uint16 *res_image;
 uint16 **data_buffer;
 
 int buffer_width, buffer_length;
 int buffer_size;
 int pages, page_size;
 
-static const char *output_filename[] = {"dark_avg.tif", "dark_rms.tif"};
+static const char *output_filename[] = {"dark_avg.tif", "dark_rms.tif", "data.tif"};
+
+static long int hit;
 
 int thread_status;	// threads status for hand shaking
 

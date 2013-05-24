@@ -11,7 +11,7 @@ LIB_PATH = lib/
 INCLUDE_PATH = include/
 
 # Flags
-CC=gcc
+CC=g++
 CFLAGS=-g -O3 -I/include -I/lib
 
 TARGET=data_sub

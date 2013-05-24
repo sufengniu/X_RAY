@@ -8,16 +8,12 @@
 
 struct tiff_info *info;
 
-tif_info(char **argv)
+int tif_info(char **argv)
 {
 	int dircount = 0;
 	int bound;	
 	
-	info = (struct tiff_info *)malloc(sizeof(struct tiff_info));
-	
-	uint32 data_size;
-	unsigned long image_offset;	
-	TIFF *tif;
+	info = (struct tiff_info *)malloc(sizeof(struct tiff_info));	
 	
 	tif = TIFFOpen(argv[0], "r");
 	if(tif == NULL){
@@ -67,7 +63,7 @@ tif_info(char **argv)
 }
 
 /* tif load function */
-int tif_load()
+int tif_load(uint16 *image)
 {
 	int r, c;	// height index, width index
 	uint16 s;
@@ -94,7 +90,7 @@ int tif_load()
 			
 				for(c = 0; c < info->width; c++)
 				{		
-					input_image[image_offset + info->width * r + c] = *(scanline + c);
+					image[image_offset + info->width * r + c] = *(scanline + c);
 				}
 
 			}
@@ -104,7 +100,7 @@ int tif_load()
 					TIFFReadScanline(tif, scanline, r, s);
 					for(c = 0; c < info->width; c++)
 	                        	{
-        	                        	input_image[image_offset + info->width * r + c] = *(scanline + c);
+        	                        	image[image_offset + info->width * r + c] = *(scanline + c);
 					}
 
 				}
@@ -123,23 +119,24 @@ int tif_load()
 int tif_syn(){
 	int r, c;	// height index, width index
 	uint16 s;
+	int np;
 
 	uint16 *scanline;
 
-	TIFF *tif;
+	TIFF *avg_tif, *rms_tif, *sub_tif;
 		
-	if((tif = TIFFOpen(output_filename[0], "w")) == NULL){
+	if((avg_tif = TIFFOpen(output_filename[0], "w")) == NULL){
 		printf("Open output tif file for writing failed!\n");
 		exit(0);
 	}	
 	
 	printf("\tsetting %s tif parameters\n", output_filename[0]);
-	TIFFSetField(tif, TIFFTAG_IMAGELENGTH, info->length);
-	TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, info->width);
-	TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, info->bps);
-	TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, info->spp);
-	TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, info->photo_metric);
-	TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+	TIFFSetField(avg_tif, TIFFTAG_IMAGELENGTH, info->length);
+	TIFFSetField(avg_tif, TIFFTAG_IMAGEWIDTH, info->width);
+	TIFFSetField(avg_tif, TIFFTAG_BITSPERSAMPLE, info->bps);
+	TIFFSetField(avg_tif, TIFFTAG_SAMPLESPERPIXEL, info->spp);
+	TIFFSetField(avg_tif, TIFFTAG_PHOTOMETRIC, info->photo_metric);
+	TIFFSetField(avg_tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
 	
 	if((scanline = (uint16 *)_TIFFmalloc(info->width * info->length * sizeof(uint16))) == NULL){
 		printf("Could not allocate enough memory for the scan buffer!\n");
@@ -152,30 +149,24 @@ int tif_syn(){
 		for (c = 0; c < info->width; c++){	
 			*(scanline + c) = output_image_avg[info->width * r + c];
 		}
-		TIFFWriteScanline(tif, scanline, r, s);
+		TIFFWriteScanline(avg_tif, scanline, r, s);
 	}
 
 	printf("\twriting %s image done!\n", output_filename[0]);
-	_TIFFfree(scanline);
-	TIFFClose(tif);
+	TIFFClose(avg_tif);
 
-	if((tif = TIFFOpen(output_filename[1], "w")) == NULL){
+	if((rms_tif = TIFFOpen(output_filename[1], "w")) == NULL){
 		printf("Open output tif file for writing failed!\n");
 		exit(0);
 	}
 
 	printf("\tsetting %s parameters\n", output_filename[1]);
-	TIFFSetField(tif, TIFFTAG_IMAGELENGTH, info->length);
-	TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, info->width);
-	TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, info->bps);
-	TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, info->spp);
-	TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, info->photo_metric);
-	TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-
-	if((scanline = (uint16 *)_TIFFmalloc(info->width * info->length * sizeof(uint16))) == NULL){
-		printf("Could not allocate enough memory for the scan buffer!\n");
-		exit(0);
-	}
+	TIFFSetField(rms_tif, TIFFTAG_IMAGELENGTH, info->length);
+	TIFFSetField(rms_tif, TIFFTAG_IMAGEWIDTH, info->width);
+	TIFFSetField(rms_tif, TIFFTAG_BITSPERSAMPLE, info->bps);
+	TIFFSetField(rms_tif, TIFFTAG_SAMPLESPERPIXEL, info->spp);
+	TIFFSetField(rms_tif, TIFFTAG_PHOTOMETRIC, info->photo_metric);
+	TIFFSetField(rms_tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
 
 	printf("\twriting %s tif images...\n", output_filename[1]);
 
@@ -183,12 +174,44 @@ int tif_syn(){
 		for (c = 0; c < info->width; c++){
 			*(scanline + c) = output_image_std[info->width * r + c];
 		}
-		TIFFWriteScanline(tif, scanline, r, s);
+		TIFFWriteScanline(rms_tif, scanline, r, s);
 	}
 
 	printf("\twriting %s image done!\n", output_filename[1]);
+	TIFFClose(rms_tif);
+
+	// under testing
+	if((sub_tif = TIFFOpen(output_filename[2], "w")) == NULL){
+                printf("Open output tif file for writing failed!\n");
+                exit(0);
+        }
+
+        printf("\twriting %s tif images...\n", output_filename[2]);
+	
+	image_offset = 0;
+	for (np = 0; np < pages; np++){
+		TIFFSetField(sub_tif, TIFFTAG_SUBFILETYPE, FILETYPE_PAGE);
+		TIFFSetField(sub_tif, TIFFTAG_IMAGELENGTH, info->length);
+		TIFFSetField(sub_tif, TIFFTAG_IMAGEWIDTH, info->width);
+		TIFFSetField(sub_tif, TIFFTAG_BITSPERSAMPLE, info->bps);
+		TIFFSetField(sub_tif, TIFFTAG_SAMPLESPERPIXEL, info->spp);
+		TIFFSetField(sub_tif, TIFFTAG_PHOTOMETRIC, info->photo_metric);
+		TIFFSetField(sub_tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+		TIFFSetField(sub_tif, TIFFTAG_PAGENUMBER, np, pages);
+		
+		for (r = 0; r < info->length; r++){
+			for (c = 0; c < info->width; c++){
+				*(scanline + c) = res_image[image_offset + info->width * r + c];
+			}
+			TIFFWriteScanline(sub_tif, scanline, r, s);
+		}
+		image_offset += info->image_size/sizeof(uint16);
+		TIFFWriteDirectory(sub_tif);
+	}
+	
+	printf("\twriting %s image done!\n", output_filename[2]);
 	_TIFFfree(scanline);
-	TIFFClose(tif);
+	TIFFClose(sub_tif);
 
 	return 0;
 }

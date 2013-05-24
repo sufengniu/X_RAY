@@ -21,15 +21,15 @@ int main(int argc, char *argv[])
 /*
  * initiliazation, threads number definition, parameters definition
  */
-	void *status;
 	int i;
 	thr_pool_t *pool;
 	pool = (thr_pool_t *)malloc(sizeof(thr_pool_t));
-		
+	hit = 0;
+			
 	NUM_THREADS = DEFAULT_THREADS_NUM;	// defined in sys_config.h	
 	NUM_PROCESS = NUM_BLADES;
 	
-	if (argc == 3){
+	if (argc == 4){
 		NUM_THREADS = atoi(argv[1]);
 	} else{
 		printf("Usage: exe n tif\n");
@@ -57,21 +57,24 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	/*------------------ tif loading ---------------------*/
+/*
+ *
+ *
+ */
+
+	/*------------------ dark mode operation threads ---------------------*/
+	/* tif loading */
 	tif_info(argv+2);
 	dk_mem_alloc();		// dark image mem allocation
 	buffer_size = buffer_length * buffer_width;
-	printf("master thread: buffer size is %d\n", buffer_size);
-	printf("master thread: buffer length is %d, buffer width is %d\n", buffer_length, buffer_width);
 	
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tif_start);	
-	tif_load();
+	tif_load(input_image);
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tif_stop);
 	tif_accum = (tif_stop.tv_sec-tif_start.tv_sec)+(double)(tif_stop.tv_nsec-tif_start.tv_nsec)/(double)BILLION;
         printf("master thread: dark image loading done in %lf second\n", tif_accum);
 	
-	/*------------------ processing threads ---------------------*/
-	/* assign thread number from 1 to NUM_PROCESS_THREADS */
+	/* assign threads based on thread pool */
 	for (i = 0; i<NUM_PROCESS_THREADS; i++){
 		starg[i].tid = i;
 		starg[i].pid = 0;
@@ -82,41 +85,49 @@ int main(int argc, char *argv[])
 			exit(0);
 		}
 	}
-	
 	/* wait for all threads complete */	
-	thr_pool_wait(pool);	
+	thr_pool_wait(pool);
+	
 	printf("master thread: dark mode is done!\n");
 	printf("---------------------------------------------\n");
 	printf("master thread: starting data mode...\n");
+
+/*
+ *
+ *
+ */
 	
+	/*------------------ data mode operation threads ---------------------*/
 	/* loading data image */
 	tif_info(argv+3);
 	dt_mem_alloc();
 
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tif_start);
-        tif_load();
-        clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tif_stop);
-        tif_accum = (tif_stop.tv_sec-tif_start.tv_sec)+(double)(tif_stop.tv_nsec-tif_start.tv_nsec)/(double)BILLION;
-        printf("master thread: data image loading done in %lf second\n", tif_accum);
+	tif_load(data_image);
+	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tif_stop);
+	tif_accum = (tif_stop.tv_sec-tif_start.tv_sec)+(double)(tif_stop.tv_nsec-tif_start.tv_nsec)/(double)BILLION;
+	printf("master thread: data image loading done in %lf second\n", tif_accum);
 	/* assign thread number from 1 to NUM_PROCESS_THREADS */
-        for (i = 0; i<NUM_PROCESS_THREADS; i++){
-                starg[i].tid = i;
-                starg[i].pid = 0;
+	for (i = 0; i<NUM_PROCESS_THREADS; i++){
+		starg[i].tid = i;
+		starg[i].pid = 0;
 
-                thread_status = thr_pool_queue(pool, sub, (void *)(starg+i));
-                if (thread_status == -1){
-                        printf("An error had occurred while adding a task!\n");
-                        exit(0);
-                }
-        }
+		thread_status = thr_pool_queue(pool, sub, (void *)(starg+i));
+		if (thread_status == -1){
+			printf("An error had occurred while adding a task!\n");
+			exit(0);
+		}
+	}
 	thr_pool_wait(pool);
 
-	/*------------------ tif --------------------*/
+	/*------------------ tif write --------------------*/
 	printf("master thread: synthesis multiple chunks \n");
 	printf("master thread: writing average image to %s file \n", output_filename[0]);
 	printf("master thread: writing rms image to %s file \n", output_filename[1]);
-	tif_syn();
 
+	tif_syn();
+	
+	/* clean up */
 	pthread_attr_destroy(&attr);
 	thr_pool_destroy(pool);
 	dk_mem_free();          // free dark image mem

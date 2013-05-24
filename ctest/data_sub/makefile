@@ -51,4 +51,4 @@ tar:
 	tar cvf *.c *.h lib/ makefile
 
 clean:
-	rm -rf $(OBJ_PATH)*.o *.a $(TARGET) dark_avg.tif dark_rms.tif *.tar
+	rm -rf $(OBJ_PATH)*.o *.a $(TARGET) dark_avg.tif dark_rms.tif data.tif *.tar
