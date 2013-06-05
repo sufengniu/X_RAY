@@ -48,7 +48,7 @@ $(OBJ_PATH)%.o: $(SRC_PATH)%.c $(DEPS)
 
 tar: 
 	@echo "compress the project"
-	tar cvf *.c *.h lib/ makefile
+	tar -cvzf data_sub.tgz ../data_sub
 
 clean:
 	rm -rf $(OBJ_PATH)*.o *.a $(TARGET) dark_avg.tif dark_rms.tif data.tif *.tar

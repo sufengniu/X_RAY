@@ -21,8 +21,9 @@ int main(int argc, char *argv[])
 {
 
 /*
- * initiliazation, parameters definition
+ * initiliazation, parameters, configuration setup
  */
+
 	char mode, source;
 	char config_sel;
 

@@ -1,6 +1,8 @@
 
 this is prototype code for X-ray camera data preprocessing based on ATCA chassis
 
+the obj dir need to be created
+
 project file structure
 .
 |-- include

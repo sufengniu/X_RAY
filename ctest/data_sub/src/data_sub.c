@@ -58,15 +58,18 @@ int main(int argc, char *argv[])
 	}
 
 /*
- *
- *
+ * tif.c API 
+ * tif_infoi:	read the tif file to obtain image parameters. i.e: image size
+ * tif_load:	load the tif file into the memory space
+ * tif_syn:	tif file extracted out from memory,
+ * 		stored as dark_avg.tif, dark_rms.tif, data.tif
+ * tif_release:	free tif file memory
  */
 
 	/*------------------ dark mode operation threads ---------------------*/
 	/* tif loading */
 	tif_info(argv+2);
-	dk_mem_alloc();		// dark image mem allocation
-	buffer_size = buffer_length * buffer_width;
+	dk_mem_alloc();		// dark image mem allocation	
 	
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tif_start);	
 	tif_load(input_image);
@@ -100,7 +103,7 @@ int main(int argc, char *argv[])
 	/*------------------ data mode operation threads ---------------------*/
 	/* loading data image */
 	tif_info(argv+3);
-	dt_mem_alloc();
+	dt_mem_alloc();		// data image mem allocation
 
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tif_start);
 	tif_load(data_image);

@@ -48,6 +48,15 @@ void dk_mem_alloc(){
 		}
 	}
 
+	/* mask to remove bad strips */
+	mask_buffer = (uint16 **)malloc(NUM_PROCESS_THREADS * sizeof(void *));
+	for(i = 0; i<NUM_PROCESS_THREADS; i++){
+		if((*(mask_buffer+i) = (uint16 *)malloc(buffer_length * buffer_width * NUM_PROCESS_THREADS * sizeof(uint16))) == NULL){
+			printf("Could not allocate enough memory for rms_buffer!\n");
+			exit(0);
+		}
+	}
+	
 	if((input_image = (uint16 *)_TIFFmalloc(pages * page_size * sizeof(uint16))) == NULL){
 		fprintf(stderr, "Could not allocate enough memory for the uncompressed image!\n");
 		exit(42);
@@ -65,8 +74,10 @@ void dk_mem_alloc(){
 
 void dt_mem_alloc(){
 	int i;
-	
-	starg = (struct slave_thread_arg *)malloc(NUM_PROCESS_THREADS * sizeof(struct slave_thread_arg));
+	x_low_bound = (int *)malloc(BAD_STRIP * sizeof(int));
+	y_low_bound = (int *)malloc(BAD_STRIP * sizeof(int));
+	x_high_bound = (int *)malloc(BAD_STRIP * sizeof(int));
+	y_high_bound = (int *)malloc(BAD_STRIP * sizeof(int));
 
 	if((data_image = (uint16 *)_TIFFmalloc(pages * page_size * sizeof(uint16))) == NULL){
 		printf("Could not allocate enough memory for data image!\n");

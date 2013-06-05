@@ -41,6 +41,7 @@ int tif_info(char **argv)
 	/* global variable */
 	buffer_length = info->length/NUM_PROCESS_THREADS;
 	buffer_width = info->width;
+	buffer_size = buffer_length * buffer_width;
 	page_size = info->length * info->width;
 	
 	printf("\tlength = %d, width = %d\n", info->length, info->width);
