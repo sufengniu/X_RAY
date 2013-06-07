@@ -1,0 +1,15 @@
+
+this is prototype code for X-ray camera data preprocessing based on ATCA chassis
+
+the obj dir need to be created
+
+UDP issue:
+for 10G udp link
+please check ifconfig link speed and ip address
+ex:
+	dmesg | grep eth5
+
+change ip address as 10.0.0.1 and 10.0.0.2
+in /etc/sysconfig/network-scripts/ifcfg-<iface>
+
+

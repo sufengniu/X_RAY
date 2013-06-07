@@ -9,6 +9,7 @@
 #include <netdb.h>    // network info lookup prototypes and structures
 #include <netinet/in.h>	// struct sockaddr_in; byte ordering macros
 #include <arpa/inet.h>  // utility function prototypes
+#include <unistd.h>
 
 #define PORT	9930
 #define BUFLEN 512
@@ -17,28 +18,34 @@
 
 int main()
 {
-	struct sockaddr_in, serveraddr;
+	struct sockaddr_in serveraddr, clientaddr;
 
-	int socketid, i;
+	int socketid;
 	if ((socketid = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
 		printf("Error: socket failed!\n");
 		exit(0);
 	}
 	char recv_buf[BUFLEN];
 	
-	const char *msg = {"hello world!"};
+	const char *msg = {"copy that! udp server respond test"};
 	int len = strlen(msg);
 	
 	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_port = htons(PORT); 	// host to network, short
-	serveraddr.sin_addr.s_addr = inet_addr(ipaddr);
+	//serveraddr.sin_addr.s_addr = inet_addr(ipaddr);
 
 	if (bind(socketid, (struct sockaddr *)&serveraddr, sizeof(serveraddr))==-1){
 		printf("error: bind failed\n");
 		exit(0);
 	}
 
+	socklen_t size=sizeof(clientaddr);	
+	recvfrom(socketid, recv_buf, BUFLEN, 0, (struct sockaddr *)&clientaddr, &size);
 	
+	printf("server recive %s\n", recv_buf);
+	printf("server send %s\n", msg);
+
+	sendto(socketid, msg, len, 0, (struct sockaddr *)&clientaddr, size);
 	
 	close(socketid);
 	
