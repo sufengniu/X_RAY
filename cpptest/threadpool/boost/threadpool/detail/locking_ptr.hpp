@@ -33,18 +33,18 @@ namespace boost { namespace threadpool { namespace detail
  * This class is a wrapper for a volatile pointer. It enables synchronized access to the
  * internal pointer by locking the passed mutex.
  */
-  template <typename T, typename Mutex>
+  template <typename T, typename mutex>
   class locking_ptr 
   : private noncopyable
   {
     T* m_obj;                     //!< The instance pointer. 
-    Mutex & m_mutex;              //!< Mutex is used for scoped locking.
+    mutex & m_mutex;              //!< mutex is used for scoped locking.
 
   public:
     /// Constructor.
-    locking_ptr(volatile T& obj, const volatile Mutex& mtx)
+    locking_ptr(volatile T& obj, const volatile mutex& mtx)
       : m_obj(const_cast<T*>(&obj))
-      , m_mutex(*const_cast<Mutex*>(&mtx))
+      , m_mutex(*const_cast<mutex*>(&mtx))
     {   
       // Lock mutex
 	  m_mutex.lock();

@@ -14,7 +14,8 @@
 #define PORT	9930
 #define BUFLEN 512
 #define NPACK 10
-#define ipaddr 127.0.0.1
+
+char *ipaddr={"127.0.0.1"};
 
 int main()
 {
@@ -32,9 +33,9 @@ int main()
 	
 	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_port = htons(PORT); 	// host to network, short
-	//serveraddr.sin_addr.s_addr = inet_addr(ipaddr);
+	serveraddr.sin_addr.s_addr = inet_addr(ipaddr);
 
-	if (bind(socketid, (struct sockaddr *)&serveraddr, sizeof(serveraddr))==-1){
+	if (bind(socketid, (struct sockaddr *)&serveraddr, sizeof(struct sockaddr))==-1){
 		printf("error: bind failed\n");
 		exit(0);
 	}

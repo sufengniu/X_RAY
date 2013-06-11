@@ -9,7 +9,7 @@ void setup(){
 	printf("------------ fccd X-ray camera  ------------\n");
 	printf("---------------------------------------------\n");
 	printf("-- Group: APS X-ray division sector 8\n");
-	printf("-- Application: X-ray data pre-processing\n");
+	printf("-- Simulation: X-ray data pre-processing\n");
 	printf("-- Description: \n");
 	printf("=============================================\n\n");
 	printf("Type ctr+c to quit\n");
@@ -36,23 +36,9 @@ void setup(){
 	}
 	
 	printf("Process and threads setup:\n");
-	printf("-- Default configuration:\n");
 	printf("-- thread number: %d\n", DEFAULT_THREADS_NUM);
 	printf("-- process number: %d\n", DEFAULT_PROCESS_NUM);
 	printf("Using default configuration? y or n");
-	
-	scanf("%c", &config_sel);
-	if ( config_sel == 'y' || config_sel == 'Y'){
-		
-	}
-	else if( config_sel == 'n' || config_sel == 'N'){
-		
-		
-	}
-	else {
-		printf("configuration selection is illeagle!\n");
-		exit(0);
-	}
 	
 	printf("Please select mode: 1.dark mode; 2.data mode\n");
 	printf("-- Usage: type 1 and 2 to select\n");

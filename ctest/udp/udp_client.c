@@ -12,10 +12,11 @@
 #define BUFLEN 512
 #define PORT 9930
 
+char *ipaddr={"127.0.0.1"};
 
 int main()
 {
-	struct sockaddr_in clientaddr, serveraddr;
+	struct sockaddr_in serveraddr;
 	
 	const char *msg = {"hello world!"};
 	int len = strlen(msg);
@@ -23,7 +24,7 @@ int main()
 	char recv_buf[BUFLEN];
 
 	int socketid;
-	if (((socketid = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1))
+	if ((socketid = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
 	{
 		printf("Error: socket failed!\n");
 		exit(0);
@@ -31,6 +32,8 @@ int main()
 	
 	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_port = htons(PORT);      // host to network, short
+
+	inet_pton(AF_INET, ipaddr, &serveraddr.sin_addr);
 	
 	socklen_t size=sizeof(serveraddr);
 	

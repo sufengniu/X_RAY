@@ -1,10 +1,10 @@
 #include "../include/udp_client.h"
 
-
+#include "../include/tif.h"
 
 int main(int argc, char *argv[])
 {
-	struct sockaddr_in clienti_addr, server_addr;
+	struct sockaddr_in *clienti_addr, *server_addr;
 	
 	int sid;	// socket ID
 	if (((sid = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1))
