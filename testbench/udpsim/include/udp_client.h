@@ -8,3 +8,5 @@
 #include <netinet/in.h> // struct sockaddr_in; byte ordering macros
 #include <arpa/inet.h>  // utility function prototypes
 
+uint16 *sim_image;
+

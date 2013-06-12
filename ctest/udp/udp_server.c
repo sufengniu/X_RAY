@@ -19,7 +19,7 @@ char *ipaddr={"127.0.0.1"};
 
 int main()
 {
-	struct sockaddr_in serveraddr, clientaddr;
+	struct sockaddr_in *serveraddr, clientaddr;
 
 	int socketid;
 	if ((socketid = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
@@ -27,15 +27,16 @@ int main()
 		exit(0);
 	}
 	char recv_buf[BUFLEN];
-	
+
+	serveraddr = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
 	const char *msg = {"copy that! udp server respond test"};
 	int len = strlen(msg);
 	
-	serveraddr.sin_family = AF_INET;
-	serveraddr.sin_port = htons(PORT); 	// host to network, short
-	serveraddr.sin_addr.s_addr = inet_addr(ipaddr);
+	serveraddr->sin_family = AF_INET;
+	serveraddr->sin_port = htons(PORT); 	// host to network, short
+	serveraddr->sin_addr.s_addr = inet_addr(ipaddr);
 
-	if (bind(socketid, (struct sockaddr *)&serveraddr, sizeof(struct sockaddr))==-1){
+	if (bind(socketid, (struct sockaddr *)serveraddr, sizeof(struct sockaddr))==-1){
 		printf("error: bind failed\n");
 		exit(0);
 	}

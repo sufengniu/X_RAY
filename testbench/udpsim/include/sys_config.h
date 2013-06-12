@@ -27,7 +27,16 @@
 #define LENGTH                  2000
 #define WIDTH                   1152
 
+/* mask setting for bad strip */
 #define BAD_STRIP		1
+#define X_LOW_BOUND_1		109
+#define X_HIGH_BOUND_1		120
+#define Y_LOW_BOUND_1		0
+#define Y_HIGH_BOUND_1		961
+
+/* udp socket */
+#define PORT			6800	// the sender and reciver port
+char *ipaddr = {"127.0.0.1"};
 
 int NUM_THREADS, NUM_PROCESS_THREADS;	// threads number, number of processing threads
 int NUM_PROCESS;			// process number
@@ -47,9 +56,15 @@ uint16 **data_buffer;
 int *x_low_bound, *x_high_bound;
 int *y_low_bound, *y_high_bound;
 
-int buffer_width, buffer_length;
-int buffer_size;
-int pages, page_size;
+typedef struct image_info{
+	int width;
+	int length;
+	int page_num;
+	int buffer_width, buffer_length;
+	int buffer_size;
+	int image_size;
+	
+} image_info;
 
 static const char *output_filename[] = {"dark_avg.tif", "dark_rms.tif", "data.tif"};
 

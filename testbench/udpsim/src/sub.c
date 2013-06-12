@@ -35,17 +35,17 @@ int mask_init(tid){
 	 * x: 109 ~ 120
 	 * y: 0 ~ 961
 	 */
-	*x_low_bound = 109;
-	*x_high_bound = 120;
-	*y_low_bound = 0;
-	*y_high_bound = 961;
+	*x_low_bound = X_LOW_BOUND_1;
+	*x_high_bound = X_HIGH_BOUND_1;
+	*y_low_bound = Y_LOW_BOUND_1;
+	*y_high_bound = Y_HIGH_BOUND_1;
 
-	for (i = 0; i<buffer_length; i++){
-		for (j = 0; j<buffer_width; j++){
+	for (i = 0; i < image_size->buffer_length; i++){
+		for (j = 0; j < image_size->buffer_width; j++){
 			if ((j>=*x_low_bound) && (j<=*x_high_bound) && (i>=*y_low_bound) && (i<=*y_high_bound))
-				*(*(mask_buffer + tid) + i * buffer_width + j) = 0;	
+				*(*(mask_buffer + tid) + i * image_size->buffer_width + j) = 0;	
 			else
-				*(*(mask_buffer + tid) + i * buffer_width + j) = 1;
+				*(*(mask_buffer + tid) + i * image_size->buffer_width + j) = 1;
 		}
 	}
 
@@ -59,25 +59,23 @@ int sub_op(int tid)
 	int lld;
 	int res_pixel;
 	printf("thread %d: data subtraction operation begin ... \n", tid);
-	
-	for (k = 0; k < pages; k++){
 
-		for (i = 0; i<buffer_length; i++){
-			for (j = 0; j<buffer_width; j++){
-				image_index = j + i * buffer_width + tid * buffer_size + k * page_size;
+	for (i = 0; i < image_size->buffer_length; i++){
+		for (j = 0; j < image_size->buffer_width; j++){
+			image_index = j + i * image_size->buffer_width + tid * buffer_size + k * page_size;
 				
-				lld = alpha * rms_buffer[tid][j+i*buffer_width] + beta;
-				res_pixel = data_image[image_index] - avg_buffer[tid][j+i*buffer_width];
+			lld = alpha * rms_buffer[tid][j+i*image_size->buffer_width] + beta;
+			res_pixel = data_image[image_index] - avg_buffer[tid][j+i*image_size->buffer_width];
 			
-				if (res_pixel >= lld){
-					res_image[image_index] = res_pixel;
-				}
-				else {
-					res_image[image_index] = 0;
-				}
-
-				res_image[image_index] = res_image[image_index] * mask_buffer[tid][j+i*buffer_width]; 
+			if (res_pixel >= lld){
+				res_image[image_index] = res_pixel;
 			}
+			else {
+				res_image[image_index] = 0;
+			}
+
+			res_image[image_index] = res_image[image_index] * mask_buffer[tid][j+i*image_size->buffer_width]; 
+	
 		}
 	}
 	return 0;

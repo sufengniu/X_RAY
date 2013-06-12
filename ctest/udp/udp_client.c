@@ -16,7 +16,7 @@ char *ipaddr={"127.0.0.1"};
 
 int main()
 {
-	struct sockaddr_in serveraddr;
+	struct sockaddr_in *serveraddr;
 	
 	const char *msg = {"hello world!"};
 	int len = strlen(msg);
@@ -30,21 +30,23 @@ int main()
 		exit(0);
 	}
 	
-	serveraddr.sin_family = AF_INET;
-	serveraddr.sin_port = htons(PORT);      // host to network, short
+	serveraddr = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
+		
+	serveraddr->sin_family = AF_INET;
+	serveraddr->sin_port = htons(PORT);      // host to network, short
 
-	inet_pton(AF_INET, ipaddr, &serveraddr.sin_addr);
+	inet_pton(AF_INET, ipaddr, &serveraddr->sin_addr);
 	
-	socklen_t size=sizeof(serveraddr);
+	socklen_t size=sizeof(struct sockaddr_in);
 	
 	char hit[4];
 	printf("start sender, hit return to send\n");
 	fgets(hit, 4, stdin);
 		
 	printf("client send %s\n", msg);
-	sendto(socketid, msg, len, 0, (struct sockaddr *)&serveraddr, size);
+	sendto(socketid, msg, len, 0, (struct sockaddr *)serveraddr, size);
 	
-	recvfrom(socketid, recv_buf, BUFLEN, 0, (struct sockaddr *)&serveraddr, &size);
+	recvfrom(socketid, recv_buf, BUFLEN, 0, (struct sockaddr *)serveraddr, &size);
 	
 	printf("client receive %s\n", recv_buf);
 	

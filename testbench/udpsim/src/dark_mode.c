@@ -1,3 +1,4 @@
+#include <mpi.h>
 #include "../include/sys_config.h"
 #include "../lib/thr_pool.h"
 #include "../include/platform_init.h"
@@ -11,14 +12,6 @@
 /*------------------ dark mode operation threads ----------------*/
 int dark_op(char *argv[]){
 	
-	if (source == 1){
-		tif_io(argv);
-		
-	}
-	else if (source == 2){
-		udp_io;
-		
-	}
 	
 	
 

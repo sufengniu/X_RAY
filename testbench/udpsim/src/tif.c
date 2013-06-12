@@ -2,8 +2,12 @@
 #include "../include/tif.h"
 
 /*
- *
- *
+ * tif.c API 
+ * tif_infoi:	read the tif file to obtain image parameters. i.e: image size
+ * tif_load:	load the tif file into the memory space
+ * tif_syn:	tif file extracted out from memory,
+ * 		stored as dark_avg.tif, dark_rms.tif, data.tif
+ * tif_release: free tif file memory
  */
 
 struct tiff_info *info;
@@ -28,7 +32,7 @@ int tif_info(char **argv)
 	printf("\t%d images in %s\n", dircount, argv[0]);
 	
 	/* global variable */
-	pages = dircount;
+	image_info->page_num = dircount;
 	
 	// input image paramters
 	TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &info->length);
@@ -39,10 +43,12 @@ int tif_info(char **argv)
 	TIFFGetField(tif, TIFFTAG_PLANARCONFIG, &info->config);
 	
 	/* global variable */
-	buffer_length = info->length/NUM_PROCESS_THREADS;
-	buffer_width = info->width;
-	buffer_size = buffer_length * buffer_width;
-	page_size = info->length * info->width;
+	image_info->buffer_length = info->length/NUM_PROCESS_THREADS;
+	image_info->buffer_width = info->width;
+	image_info->buffer_size = image_info->buffer_length * image_info->buffer_width;
+	image_info->image_size = info->length * info->width;
+	image_info->width = info->width;
+	image_info->length = info->length;
 	
 	printf("\tlength = %d, width = %d\n", info->length, info->width);
 	printf("\tbit per sample = %d\n", info->bps);
@@ -125,7 +131,8 @@ int tif_syn(){
 	uint16 *scanline;
 
 	TIFF *avg_tif, *rms_tif, *sub_tif;
-		
+	
+	/* average tif writing */	
 	if((avg_tif = TIFFOpen(output_filename[0], "w")) == NULL){
 		printf("Open output tif file for writing failed!\n");
 		exit(0);
@@ -156,6 +163,7 @@ int tif_syn(){
 	printf("\twriting %s image done!\n", output_filename[0]);
 	TIFFClose(avg_tif);
 
+	/* root mean square tif writing */
 	if((rms_tif = TIFFOpen(output_filename[1], "w")) == NULL){
 		printf("Open output tif file for writing failed!\n");
 		exit(0);
@@ -181,7 +189,7 @@ int tif_syn(){
 	printf("\twriting %s image done!\n", output_filename[1]);
 	TIFFClose(rms_tif);
 
-	// under testing
+	/* subtracted data writing */
 	if((sub_tif = TIFFOpen(output_filename[2], "w")) == NULL){
                 printf("Open output tif file for writing failed!\n");
                 exit(0);
@@ -190,7 +198,7 @@ int tif_syn(){
         printf("\twriting %s tif images...\n", output_filename[2]);
 	
 	image_offset = 0;
-	for (np = 0; np < pages; np++){
+	for (np = 0; np < image_info->page_num; np++){
 		TIFFSetField(sub_tif, TIFFTAG_SUBFILETYPE, FILETYPE_PAGE);
 		TIFFSetField(sub_tif, TIFFTAG_IMAGELENGTH, info->length);
 		TIFFSetField(sub_tif, TIFFTAG_IMAGEWIDTH, info->width);
@@ -198,7 +206,7 @@ int tif_syn(){
 		TIFFSetField(sub_tif, TIFFTAG_SAMPLESPERPIXEL, info->spp);
 		TIFFSetField(sub_tif, TIFFTAG_PHOTOMETRIC, info->photo_metric);
 		TIFFSetField(sub_tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-		TIFFSetField(sub_tif, TIFFTAG_PAGENUMBER, np, pages);
+		TIFFSetField(sub_tif, TIFFTAG_PAGENUMBER, np, image_info->page_num);
 		
 		for (r = 0; r < info->length; r++){
 			for (c = 0; c < info->width; c++){
