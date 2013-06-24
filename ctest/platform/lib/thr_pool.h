@@ -22,15 +22,9 @@ typedef unsigned int uint_t;
  */
 typedef struct job job_t;
 struct job {
-<<<<<<< HEAD
-	job_t    *job_next;        /* linked list of jobs */
-	void    *(*job_func)(void *);    /* function to call */
-	void    *job_arg;        /* its argument */
-=======
         job_t    *job_next;        /* linked list of jobs */
         void    *(*job_func)(void *);    /* function to call */
         void    *job_arg;        /* its argument */
->>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
 };
 
 /*
@@ -38,37 +32,14 @@ struct job {
  */
 typedef struct active active_t;
 struct active {
-<<<<<<< HEAD
-	active_t    *active_next;    /* linked list of threads */ 
-	pthread_t    active_tid;    /* active thread id */
-=======
         active_t    *active_next;    /* linked list of threads */ 
         pthread_t    active_tid;    /* active thread id */
->>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
 };  
 
 /*
  * The thread pool, opaque to the clients.
  */
 struct thr_pool {
-<<<<<<< HEAD
-	thr_pool_t              *pool_forw;    /* circular linked list */
-	thr_pool_t              *pool_back;    /* of all thread pools */
-	pthread_mutex_t pool_mutex;    /* protects the pool data */
-	pthread_cond_t  pool_busycv;    /* synchronization in pool_queue */
-	pthread_cond_t  pool_workcv;    /* synchronization with workers */
-	pthread_cond_t  pool_waitcv;    /* synchronization in pool_wait() */
-	active_t                *pool_active;    /* list of threads performing work */
-	job_t                   *pool_head;    /* head of FIFO job queue */
-	job_t                   *pool_tail;    /* tail of FIFO job queue */
-	pthread_attr_t  pool_attr;    /* attributes of the workers */
-	int                     pool_flags;    /* see below */
-	uint_t                  pool_linger;    /* seconds before idle workers exit */
-	int                     pool_minimum;    /* minimum number of worker threads */
-	int                     pool_maximum;    /* maximum number of worker threads */
-	int                     pool_nthreads;    /* current number of worker threads */
-	int                     pool_idle;    /* number of idle workers */
-=======
         thr_pool_t              *pool_forw;    /* circular linked list */
         thr_pool_t              *pool_back;    /* of all thread pools */
         pthread_mutex_t pool_mutex;    /* protects the pool data */
@@ -85,7 +56,6 @@ struct thr_pool {
         int                     pool_maximum;    /* maximum number of worker threads */
         int                     pool_nthreads;    /* current number of worker threads */
         int                     pool_idle;    /* number of idle workers */
->>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
 };  
 
 
@@ -102,11 +72,7 @@ struct thr_pool {
  * On error, thr_pool_create() returns NULL with errno set to the error code.
  */
 extern thr_pool_t *thr_pool_create(uint_t min_threads, uint_t max_threads,
-<<<<<<< HEAD
-		uint_t linger, pthread_attr_t *attr);
-=======
                 uint_t linger, pthread_attr_t *attr);
->>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
 
 /*
  * Enqueue a work request to the thread pool job queue.
@@ -123,11 +89,7 @@ extern thr_pool_t *thr_pool_create(uint_t min_threads, uint_t max_threads,
  * On error, thr_pool_queue() returns -1 with errno set to the error code.
  */
 extern int thr_pool_queue(thr_pool_t *pool,
-<<<<<<< HEAD
-		void *(*func)(void *), void *arg);
-=======
             void *(*func)(void *), void *arg);
->>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
 
 /*
  * Wait for all queued jobs to complete.

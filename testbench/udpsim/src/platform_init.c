@@ -83,21 +83,33 @@ void dk_mem_alloc(){
 	/* malloc buffer for multiple sub threads */
 	dk0 = (uint16 **)malloc(NUM_PROCESS_THREADS * sizeof(void *));
 	for(i = 0; i<NUM_PROCESS_THREADS; i++){
+<<<<<<< HEAD
 		if((*(dk0+i) = (uint16 *)malloc(image_info->buffer_length * image_info->buffer_width * NUM_PROCESS_THREADS * sizeof(uint16))) == NULL){
+=======
+		if((*(dk0+i) = (uint16 *)malloc(buffer_length * buffer_width * NUM_PROCESS_THREADS * sizeof(uint16))) == NULL){
+>>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
 			printf("Could not allocate enough memory for dk0!\n");
 			exit(0);
 		}
 	}
 	avg_buffer = (int16 **)malloc(NUM_PROCESS_THREADS * sizeof(void *));
 	for(i = 0; i<NUM_PROCESS_THREADS; i++){
+<<<<<<< HEAD
 		if((*(avg_buffer+i) = (int16 *)malloc(image_info->buffer_length * image_info->buffer_width * NUM_PROCESS_THREADS * sizeof(int16))) == NULL){
+=======
+		if((*(avg_buffer+i) = (int16 *)malloc(buffer_length * buffer_width * NUM_PROCESS_THREADS * sizeof(int16))) == NULL){
+>>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
 			printf("Could not allocate enough memory for avg_buffer!\n");
 			exit(0);
 		}
 	}
 	rms_buffer = (uint16 **)malloc(NUM_PROCESS_THREADS * sizeof(void *));
 	for(i = 0; i<NUM_PROCESS_THREADS; i++){
+<<<<<<< HEAD
 		if((*(rms_buffer+i) = (uint16 *)malloc(image_info->buffer_length * image_info->buffer_width * NUM_PROCESS_THREADS * sizeof(uint16))) == NULL){
+=======
+		if((*(rms_buffer+i) = (uint16 *)malloc(buffer_length * buffer_width * NUM_PROCESS_THREADS * sizeof(uint16))) == NULL){
+>>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
 			printf("Could not allocate enough memory for rms_buffer!\n");
 			exit(0);
 		}
@@ -106,11 +118,16 @@ void dk_mem_alloc(){
 	/* mask to remove bad strips */
 	mask_buffer = (uint16 **)malloc(NUM_PROCESS_THREADS * sizeof(void *));
 	for(i = 0; i<NUM_PROCESS_THREADS; i++){
+<<<<<<< HEAD
 		if((*(mask_buffer+i) = (uint16 *)malloc(image_info->buffer_length * image_info->buffer_width * NUM_PROCESS_THREADS * sizeof(uint16))) == NULL){
+=======
+		if((*(mask_buffer+i) = (uint16 *)malloc(buffer_length * buffer_width * NUM_PROCESS_THREADS * sizeof(uint16))) == NULL){
+>>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
 			printf("Could not allocate enough memory for rms_buffer!\n");
 			exit(0);
 		}
 	}
+<<<<<<< HEAD
 
 	if((input_image = (uint16 *)malloc(image_info->image_size * sizeof(uint16))) == NULL){
 		printf("Error: Could not allocate enough memory for uncompressed image!\n");
@@ -128,6 +145,19 @@ void dk_mem_alloc(){
 		exit(0);
 	}
 	if((output_image_std = (uint16 *)_TIFFmalloc(image_info->image_size * sizeof(uint16))) == NULL){
+=======
+	
+	if((input_image = (uint16 *)_TIFFmalloc(pages * page_size * sizeof(uint16))) == NULL){
+		fprintf(stderr, "Could not allocate enough memory for the uncompressed image!\n");
+		exit(42);
+	}
+
+	if((output_image_avg = (uint16 *)_TIFFmalloc(page_size * sizeof(uint16))) == NULL){
+		printf("Could not allocate enough memory for dark average output image!\n");
+		exit(0);
+	}
+	if((output_image_std = (uint16 *)_TIFFmalloc(page_size * sizeof(uint16))) == NULL){
+>>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
 		printf("Could not allocate enough memory for standard derivation output image!\n");
 		exit(0);
 	}
@@ -140,12 +170,20 @@ void dt_mem_alloc(){
 	x_high_bound = (int *)malloc(BAD_STRIP * sizeof(int));
 	y_high_bound = (int *)malloc(BAD_STRIP * sizeof(int));
 
+<<<<<<< HEAD
 	if((data_image = (uint16 *)_TIFFmalloc(pages * image_info->image_size * sizeof(uint16))) == NULL){
+=======
+	if((data_image = (uint16 *)_TIFFmalloc(pages * page_size * sizeof(uint16))) == NULL){
+>>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
 		printf("Could not allocate enough memory for data image!\n");
 		exit(0);
 	}
 
+<<<<<<< HEAD
 	if((res_image = (uint16 *)_TIFFmalloc(pages * image_info->image_size * sizeof(uint16))) == NULL){
+=======
+	if((res_image = (uint16 *)_TIFFmalloc(pages * page_size * sizeof(uint16))) == NULL){
+>>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
 		printf("Could not allocate enough memory for res image!\n");
 		exit(0);
 	}

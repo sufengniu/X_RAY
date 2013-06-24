@@ -36,7 +36,11 @@
 
 /* udp socket */
 #define PORT			6800	// the sender and reciver port
+<<<<<<< HEAD
 //char *ipaddr = {"127.0.0.1"};
+=======
+char *ipaddr = {"127.0.0.1"};
+>>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
 
 int NUM_THREADS, NUM_PROCESS_THREADS;	// threads number, number of processing threads
 int NUM_PROCESS;			// process number
@@ -56,7 +60,11 @@ uint16 **data_buffer;
 int *x_low_bound, *x_high_bound;
 int *y_low_bound, *y_high_bound;
 
+<<<<<<< HEAD
 typedef struct image_info_type{
+=======
+typedef struct image_info{
+>>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
 	int width;
 	int length;
 	int page_num;
@@ -64,8 +72,12 @@ typedef struct image_info_type{
 	int buffer_size;
 	int image_size;
 	
+<<<<<<< HEAD
 } image_info_type;
 struct image_info_type *image_info;
+=======
+} image_info;
+>>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
 
 static const char *output_filename[] = {"dark_avg.tif", "dark_rms.tif", "data.tif"};
 

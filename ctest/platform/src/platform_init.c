@@ -3,9 +3,6 @@
 
 void hw_info(){
 
-	printf("---------------------------------------------\n");
-	printf("---- X-ray camera dark average operation ----\n");
-	printf("---------------------------------------------\n");
 	printf("-- hardware information: \n");
 	printf("-- \tcore number: %d\n", NUM_CORE);
 	printf("-- \tblades number: %d\n", NUM_BLADES);
@@ -15,7 +12,7 @@ void hw_info(){
 	
 }
 
-void dk_mem_alloc(){
+void thr_mem_alloc(){
 	int i;	
 	
 	/* setup to measure threads time */
@@ -28,54 +25,24 @@ void dk_mem_alloc(){
 	/* malloc buffer for multiple sub threads */
 	dk0 = (uint16 **)malloc(NUM_PROCESS_THREADS * sizeof(void *));
 	for(i = 0; i<NUM_PROCESS_THREADS; i++){
-<<<<<<< HEAD
-		if((*(dk0+i) = (uint16 *)malloc(buffer_length * buffer_width * sizeof(uint16))) == NULL){
-=======
 		if((*(dk0+i) = (uint16 *)malloc(buffer_length * buffer_width * NUM_PROCESS_THREADS * sizeof(uint16))) == NULL){
->>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
 			printf("Could not allocate enough memory for dk0!\n");
 			exit(0);
 		}
 	}
 	avg_buffer = (int16 **)malloc(NUM_PROCESS_THREADS * sizeof(void *));
 	for(i = 0; i<NUM_PROCESS_THREADS; i++){
-<<<<<<< HEAD
-		if((*(avg_buffer+i) = (int16 *)malloc(buffer_length * buffer_width * sizeof(int16))) == NULL){
-=======
 		if((*(avg_buffer+i) = (int16 *)malloc(buffer_length * buffer_width * NUM_PROCESS_THREADS * sizeof(int16))) == NULL){
->>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
 			printf("Could not allocate enough memory for avg_buffer!\n");
 			exit(0);
 		}
 	}
 	rms_buffer = (uint16 **)malloc(NUM_PROCESS_THREADS * sizeof(void *));
 	for(i = 0; i<NUM_PROCESS_THREADS; i++){
-<<<<<<< HEAD
-		if((*(rms_buffer+i) = (uint16 *)malloc(buffer_length * buffer_width * sizeof(uint16))) == NULL){
-=======
 		if((*(rms_buffer+i) = (uint16 *)malloc(buffer_length * buffer_width * NUM_PROCESS_THREADS * sizeof(uint16))) == NULL){
->>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
 			printf("Could not allocate enough memory for rms_buffer!\n");
 			exit(0);
 		}
-	}
-
-	/* mask to remove bad strips */
-	mask_buffer = (uint16 **)malloc(NUM_PROCESS_THREADS * sizeof(void *));
-	for(i = 0; i<NUM_PROCESS_THREADS; i++){
-<<<<<<< HEAD
-		if((*(mask_buffer+i) = (uint16 *)malloc(buffer_length * buffer_width * sizeof(uint16))) == NULL){
-=======
-		if((*(mask_buffer+i) = (uint16 *)malloc(buffer_length * buffer_width * NUM_PROCESS_THREADS * sizeof(uint16))) == NULL){
->>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
-			printf("Could not allocate enough memory for rms_buffer!\n");
-			exit(0);
-		}
-	}
-	
-	if((input_image = (uint16 *)_TIFFmalloc(pages * page_size * sizeof(uint16))) == NULL){
-		fprintf(stderr, "Could not allocate enough memory for the uncompressed image!\n");
-		exit(42);
 	}
 
 	if((output_image_avg = (uint16 *)_TIFFmalloc(page_size * sizeof(uint16))) == NULL){
@@ -88,36 +55,7 @@ void dk_mem_alloc(){
 	}
 }
 
-void dt_mem_alloc(){
-	int i;
-	x_low_bound = (int *)malloc(BAD_STRIP * sizeof(int));
-	y_low_bound = (int *)malloc(BAD_STRIP * sizeof(int));
-	x_high_bound = (int *)malloc(BAD_STRIP * sizeof(int));
-	y_high_bound = (int *)malloc(BAD_STRIP * sizeof(int));
-
-	if((data_image = (uint16 *)_TIFFmalloc(pages * page_size * sizeof(uint16))) == NULL){
-		printf("Could not allocate enough memory for data image!\n");
-		exit(0);
-	}
-
-	if((res_image = (uint16 *)_TIFFmalloc(pages * page_size * sizeof(uint16))) == NULL){
-		printf("Could not allocate enough memory for res image!\n");
-		exit(0);
-	}
-	
-/*		
-	data_buffer = (uint16 **)malloc(pages * sizeof(void *));
-	for(i = 0; i<NUM_PROCESS_THREADS; i++){
-		if((*(dk0+i) = (uint16 *)malloc(buffer_length * buffer_width * NUM_PROCESS_THREADS * sizeof(uint16))) == NULL){
-			printf("Could not allocate enough memory for dk0!\n");
-			exit(0);
-		}
-	}
-*/	
-	
-}
-
-void dk_mem_free(){
+void thr_mem_free(){
 	int i;
 
 	/* Clean up and exit */
@@ -145,19 +83,5 @@ void dk_mem_free(){
 	tif_release(input_image);
 	tif_release(output_image_avg);
 	tif_release(output_image_std);
-	
-}
-
-void dt_mem_free(){
-	int i;
-
-	free(data_image);
-	free(res_image);
-	/*
-	for (i = 0; i < NUM_PROCESS_THREADS; i++){
-		free(data_buffer[i]);
-	}
-	free(data_buffer);	
-	*/
 	
 }

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+int numthrds;
 
 int main(int argc, char *argv[])
 {
@@ -20,6 +21,71 @@ int main(int argc, char *argv[])
 	fclose(cpu_info);
 	return 0;	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

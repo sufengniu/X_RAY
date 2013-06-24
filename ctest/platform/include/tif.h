@@ -2,10 +2,7 @@
 #define TIF_H_
 
 #include <tiffio.h>
-<<<<<<< HEAD
-=======
 #include "sys_config.h"
->>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
 
 typedef struct tiff_info{
         unsigned short type;    /* little or big endian */
@@ -20,12 +17,7 @@ typedef struct tiff_info{
         uint16 config;
 } tiff_info;
 
-TIFF *tif;
-uint32 data_size;
-unsigned long image_offset;
-
-int tif_info(char **argv);
-int tif_load();
+int tif_load(char **argv);
 void tif_release(uint16 *image);
 int tif_syn();
 
