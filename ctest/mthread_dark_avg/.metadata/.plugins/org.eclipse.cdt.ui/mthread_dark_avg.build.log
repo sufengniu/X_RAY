@@ -1,0 +1,14 @@
+23:49:49 **** Clean-only build of configuration Build (GNU) for project mthread_dark_avg ****
+make clean 
+Making clean in src
+make[1]: Entering directory `/home/sniu/lab/x_ray/src/mthread_dark_avg/mthread_dark_avg/src'
+test -z "a.out" || rm -f a.out
+rm -f *.o
+make[1]: Leaving directory `/home/sniu/lab/x_ray/src/mthread_dark_avg/mthread_dark_avg/src'
+Making clean in .
+make[1]: Entering directory `/home/sniu/lab/x_ray/src/mthread_dark_avg/mthread_dark_avg'
+make[1]: Nothing to be done for `clean-am'.
+make[1]: Leaving directory `/home/sniu/lab/x_ray/src/mthread_dark_avg/mthread_dark_avg'
+
+23:49:49 Build Finished (took 71ms)
+
