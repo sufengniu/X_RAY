@@ -30,6 +30,7 @@ typedef struct udp_arg_type {
 
 } udp_arg_type;
 
+uint16 **image_buff;	// input image buffer, each frame load into this memory
 uint16 *image_ptr;
 
 void mem_alloc();

@@ -8,12 +8,14 @@
 #include "udp_server.h"
 #include "tif.h"
 
-int dkm()
+int dkm(int argc, char *argv[])
 {
 	int pid;
 	int i;
 	int totalthrds = 0;
 	struct udp_arg_type *udp_arg;
+	int provided, flag, claimed;
+	int errs = 0;
 		
 	/* master node printf information */
 	printf("terminal informatino marked as:\n");
@@ -23,13 +25,32 @@ int dkm()
 	printf("pid 6: ^\tpid 7: &\n");
 	printf("pid 8: *\n");
 
-	hw_info();
+	printf("---------------------------------------------\n");
+        printf("---- X-ray camera dark average operation ----\n");
+        printf("---------------------------------------------\n");
+        printf("-- hardware information: \n");
+        printf("-- cpu infomation:\n");
 
 	/* MPI Initialization */
-	MPI_Init_thread (&argc, &argv, MPI_THREAD_MULTIPLE);
+	MPI_Init_thread (&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
+
+	/* check whether threads level support or not */
+	MPI_Is_thread_main( &flag );
+	if (!flag) {
+		errs++;
+		printf( "This thread called init_thread but Is_thread_main gave false\n" );fflush(stdout);
+	}
+	MPI_Query_thread( &claimed );
+	if (claimed != provided) {
+		errs++;
+		printf( "Query thread gave thread level %d but Init_thread gave %d\n", claimed, provided );fflush(stdout);
+	}
+
 	MPI_Comm_size (MPI_COMM_WORLD, &numprocs);
 	MPI_Comm_rank (MPI_COMM_WORLD, &pid); 
 	MPI_Status status;
+
+	hw_info();
 
 	// check processor rank
 	char processor_name[MPI_MAX_PROCESSOR_NAME];
@@ -46,6 +67,7 @@ int dkm()
 	thr_pool_t *pool;
 	pool = (thr_pool_t *)malloc(sizeof(thr_pool_t));
 
+	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 	if ((pool = thr_pool_create(1, CPU_THRS_NUM, 2, &attr)) == NULL) {
@@ -85,6 +107,7 @@ int dkm()
 		udp_arg = (struct udp_arg_type *)malloc(sizeof(struct udp_arg_type));
 		udp_arg->numprocs = numprocs;	
 		udp_arg->compthrds = compthrds; // compthrds: computation threads in total.
+		udp_arg->pid = pid;
 
 		thread_status = thr_pool_queue(pool, udp, (void *)(udp_arg));
 		if (thread_status == -1){
@@ -113,19 +136,14 @@ int dkm()
 
 void hw_info()
 {
-	printf("---------------------------------------------\n");
-	printf("---- X-ray camera dark average operation ----\n");
-	printf("---------------------------------------------\n");
-	printf("-- hardware information: \n");
-	printf("-- cpu infomation:\n");
 	system("lscpu");
 
 	system("nproc > thrs_num");
 
 	FILE *cpu_info;
 	cpu_info = fopen("thrs_num", "r");
-	fscanf(cpu_info, "%d", &numthrds);
-	printf("-- threads in each node: %d\n", numthrds);
+	fscanf(cpu_info, "%d", &CPU_THRS_NUM);
+	printf("-- threads in each node: %d\n", CPU_THRS_NUM);
 
 	fclose(cpu_info);
 

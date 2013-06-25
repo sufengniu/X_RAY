@@ -1,5 +1,4 @@
 this is tif file loading, mpi library based parallel computing
-<<<<<<< HEAD
 
 mpi library and pthread library are used
 make sure your cluster has the same version of Linux
@@ -10,5 +9,5 @@ uname -m
 
 try to check MPI version by:
 ldd /your/mpi/bin/directory/hydra_pmi_proxy
-=======
->>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
+
+

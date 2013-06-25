@@ -1,3 +1,5 @@
+#ifndef THR_POOL_H_
+#define THR_POOL_H_
 /*
  * Declarations for the clients of a thread pool.
  */
@@ -100,3 +102,5 @@ extern void thr_pool_wait(thr_pool_t *pool);
  * Cancel all queued jobs and destroy the pool.
  */
 extern void thr_pool_destroy(thr_pool_t *pool);
+
+#endif

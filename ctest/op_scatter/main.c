@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 	char mode;
 	if (argc == 2){
 		mode = atoi(argv[1]);	// 1: dark mode, 2: data mode
-		numprocs = atoi(argv[2]);
+		//numprocs = atoi(argv[2]);
 	}
 	else{
 		printf("Usage: exe m\n");
@@ -19,12 +19,12 @@ int main(int argc, char *argv[])
 	
 	if (mode == 1){
 		printf("dark mode is selected\n");
-		dkm();
+		dkm(argc, argv);
 		// dkm(image_info);
 	}
 	else if (mode == 2){
 		printf("data mode is selected\n");
-		// dtm();
+		dtm(argc, argv);
 		// dtm(image_info);
 	}
 	else{

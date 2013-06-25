@@ -17,6 +17,11 @@
 struct timespec *start, *stop;
 double *accum;
 
+uint16 **dk0;			// first dark image
+uint16 **avg_buff;		// thread level average operation buffer
+uint16 **rms_buff;		// thread level root mean square buffer
+uint16 *output_image_avg, *output_image_std;	// synthesised buffer
+
 void *image_rms(int argc, char *argv[], uint16 *image);
 
 int rms_mem_alloc();

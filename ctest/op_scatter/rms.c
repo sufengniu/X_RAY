@@ -7,18 +7,12 @@
  *
  */
 
-void rms_init()
+void *image_rms(int pid, uint16 *strip_buff)
 {
+	int i, k;	
+	
 	/* allocate mem space */
-	rms_mem_alloc();
-}
-
-
-void *image_rms()
-{
-	int i, k;
-
-	rms_init();
+	rms_mem_alloc(pid, strip_buff);
 
 	for (i = (CPU_THRS_NUM-numthrds); i < CPU_THRS_NUM; i++) {
 		sarg[i].tid = i;
@@ -36,7 +30,7 @@ void *image_rms()
 	return (void *);
 }
 
-int rms_mem_alloc(int pid)
+int rms_mem_alloc(int pid, uint16 *strip_buff)
 {
 	int i;
 
@@ -48,23 +42,25 @@ int rms_mem_alloc(int pid)
 	/* user memory allocate here */
 	//_________________________________________________________________
 
-	dk0 = (uint16 **)malloc(totalthrds * sizeof(void *));
-	for(i = 0; i < totalthrds; i++){
-		if((*(dk0+i) = (uint16 *)malloc(image_info->buffer_length * image_info->buffer_width * sizeof(uint16))) == NULL){
+	strip_buff = (uint16 *)malloc(image_info->buffer_size * sizeof(uint16));
+
+	dk0 = (uint16 **)malloc(compthrds * sizeof(void *));
+	for(i = 0; i < compthrds; i++){
+		if((*(dk0+i) = (uint16 *)malloc(image_info->buffer_size * sizeof(uint16))) == NULL){
 			printf("Could not allocate enough memory for dk0!\n");
 			exit(0);
 		}
 	}
-	avg_buff = (int16 **)malloc(totalthrds * sizeof(void *));
-	for(i = 0; i < totalthrds; i++){
-		if((*(avg_buff+i) = (int16 *)malloc(image_info->buffer_length * image_info->buffer_width * sizeof(int16))) == NULL){
+	avg_buff = (int16 **)malloc(compthrds * sizeof(void *));
+	for(i = 0; i < compthrds; i++){
+		if((*(avg_buff+i) = (int16 *)malloc(image_info->buffer_size * sizeof(int16))) == NULL){
 			printf("Could not allocate enough memory for avg_buff!\n");
 			exit(0);
 		}
 	}
-	rms_buff = (uint16 **)malloc(totalthrds * sizeof(void *));
-	for(i = 0; i < totalthrds; i++){
-		if((*(rms_buff+i) = (uint16 *)malloc(image_info->buffer_length * image_info->buffer_width * sizeof(uint16))) == NULL){
+	rms_buff = (uint16 **)malloc(compthrds * sizeof(void *));
+	for(i = 0; i < compthrds; i++){
+		if((*(rms_buff+i) = (uint16 *)malloc(image_info->buffer_size * sizeof(uint16))) == NULL){
 			printf("Could not allocate enough memory for rms_buff!\n");
 			exit(0);
 		}
@@ -90,17 +86,17 @@ int rms_clean()
 	free(accum);
 
 	/* user memory free here */
-	for (i = 0; i < totalthrds * numprocs; i++){
+	for (i = 0; i < compthrds * numprocs; i++){
 		free(dk0[i]);
 	}
 	free(dk0);
 
-	for (i = 0; i < totalthrds * numprocs; i++){
+	for (i = 0; i < compthrds * numprocs; i++){
 		free(rms_buff[i]);
 	}
 	free(rms_buff);
 
-	for (i = 0; i < totalthrds * numprocs; i++){
+	for (i = 0; i < compthrds * numprocs; i++){
 		free(avg_buff[i]);
 	}
 	free(avg_buff);

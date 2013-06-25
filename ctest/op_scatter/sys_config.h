@@ -12,14 +12,14 @@
 
 #define BILLION 1000000000L;
 
-#define CPU_THRS_NUM		8
-
 #define MAX_BLAEDS_NUM		2	// maxium number of blades
 #define MAX_THREAD              100	// maxium threads number, defined by the hardware
 #define BIT_PER_SAMPLE          16	// defined by camera property
 
 #define alpha			3	// between [0, 4]
 #define beta			15	// between [0, 20]
+
+static int CPU_THRS_NUM;
 
 int totalthrds;				// threads number in total
 int compthrds;				// computation threads in total
@@ -47,7 +47,7 @@ typedef struct image_info_type{
 } image_info_type;
 struct image_info_type *image_info;
 
-uint16 *image_buff;	// input image buffer
+uint16 *strip_buff;	// threads image buffer
 
 static const char *output_filename[] = {"dark_avg.tif", "dark_rms.tif", "data.tif"};
 

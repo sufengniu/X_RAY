@@ -28,33 +28,32 @@ void dk_mem_alloc(){
 	/* malloc buffer for multiple sub threads */
 	dk0 = (uint16 **)malloc(NUM_PROCESS_THREADS * sizeof(void *));
 	for(i = 0; i<NUM_PROCESS_THREADS; i++){
-<<<<<<< HEAD
+
 		if((*(dk0+i) = (uint16 *)malloc(buffer_length * buffer_width * sizeof(uint16))) == NULL){
-=======
+
 		if((*(dk0+i) = (uint16 *)malloc(buffer_length * buffer_width * NUM_PROCESS_THREADS * sizeof(uint16))) == NULL){
->>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
+
 			printf("Could not allocate enough memory for dk0!\n");
 			exit(0);
 		}
 	}
 	avg_buffer = (int16 **)malloc(NUM_PROCESS_THREADS * sizeof(void *));
 	for(i = 0; i<NUM_PROCESS_THREADS; i++){
-<<<<<<< HEAD
+
 		if((*(avg_buffer+i) = (int16 *)malloc(buffer_length * buffer_width * sizeof(int16))) == NULL){
-=======
+
 		if((*(avg_buffer+i) = (int16 *)malloc(buffer_length * buffer_width * NUM_PROCESS_THREADS * sizeof(int16))) == NULL){
->>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
+
 			printf("Could not allocate enough memory for avg_buffer!\n");
 			exit(0);
 		}
 	}
 	rms_buffer = (uint16 **)malloc(NUM_PROCESS_THREADS * sizeof(void *));
 	for(i = 0; i<NUM_PROCESS_THREADS; i++){
-<<<<<<< HEAD
+
 		if((*(rms_buffer+i) = (uint16 *)malloc(buffer_length * buffer_width * sizeof(uint16))) == NULL){
-=======
+
 		if((*(rms_buffer+i) = (uint16 *)malloc(buffer_length * buffer_width * NUM_PROCESS_THREADS * sizeof(uint16))) == NULL){
->>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
 			printf("Could not allocate enough memory for rms_buffer!\n");
 			exit(0);
 		}
@@ -63,11 +62,11 @@ void dk_mem_alloc(){
 	/* mask to remove bad strips */
 	mask_buffer = (uint16 **)malloc(NUM_PROCESS_THREADS * sizeof(void *));
 	for(i = 0; i<NUM_PROCESS_THREADS; i++){
-<<<<<<< HEAD
+
 		if((*(mask_buffer+i) = (uint16 *)malloc(buffer_length * buffer_width * sizeof(uint16))) == NULL){
-=======
+
 		if((*(mask_buffer+i) = (uint16 *)malloc(buffer_length * buffer_width * NUM_PROCESS_THREADS * sizeof(uint16))) == NULL){
->>>>>>> f4329a25722409d8a6c855ce5763d888f5a7efde
+
 			printf("Could not allocate enough memory for rms_buffer!\n");
 			exit(0);
 		}
