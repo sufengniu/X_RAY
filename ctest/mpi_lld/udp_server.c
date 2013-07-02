@@ -2,31 +2,14 @@
 
 #include "tif.h"
 
-int udp_recv(){
-
-	thread_status = thr_pool_queue(pool, udp, (void *)(udp_arg));
-	if (thread_status == -1){
-		printf("~: Error occure in process %d: adding udp thread failed\n", pid);
-		exit(0);
-	}
-	compthrds--;
-		
-	
-}
-
-void *udp(void *udp_arg)
+void udp(MPI_Win& win)
 {
 	int i, j;
 	int num_packets;
 	int packet_size = PACKET_SIZE;
 	int buff_len;	// receive buffer length
-	int pid;
-	int msg_len;
-	int resize;
+	int rank;
 
-	struct udp_arg_type *arg = (struct udp_arg_type *)udp_arg;
-	pid = arg->pid;	
-	
 	image_info = (struct image_info_type *)malloc(sizeof(struct image_info_type));	
 	
 	/* setup udp socket */
@@ -62,28 +45,31 @@ void *udp(void *udp_arg)
 	recvfrom(sid, image_info, sizeof(struct image_info_type), MSG_WAITALL, (struct sockaddr *)client_addr, &size);
 	
 	num_packets = ceil((float)image_info->image_size/packet_size);
-	image_info->buffer_length = ceil((float)image_info->length/ttlcompthrds);
+	image_info->buffer_length = ceil((float)image_info->length/compprocs);
 	image_info->buffer_width = image_info->width;
 	image_info->buffer_size = image_info->buffer_length * image_info->buffer_width;
 	printf("~: image info:\n");
 	printf("~: image length: %d, image width: %d\n", image_info->length, image_info->width);
-	printf("~: total computation threads number: %d", ttlcompthrds);
+	printf("~: computation process number: %d", compprocs);
 	printf("~: image threads buffer width: %d, buffer length: %d", image_info->buffer_width, image_info->buffer_length);
 	printf("~: image page number: %d\n", image_info->page_num);
 	printf("~: packet number per frame: %d\n", num_packets);
-
-	msg_len = image_info->buffer_size * numthrds/numprocs; 
 	
-	resize = mem_alloc();
+	mem_alloc();
+
+	/* remote memory access */
+	MPI_Win_create(image_buff, 2*image_info->image_size*sizeof(uint16), sizeof(uint16), MPI_INFO_NULL, MPI_COMM_WORLD, &win);
 	
 	image_ptr = image_buff;
 	int ping_pong = 1;		
-
+	
+	// barrier here to ensure initial done for other process
+	MPI_Barrier(MPI_COMM_WORLD);
+	
 	for (i = 0; i < image_info->page_num; i++)
 	{	
-		ping_pong != ping_pong;
-		/* do not use image_info->image_size, the image size has been resized for multi-strip */ 
-		image_ptr = image_buff + ping_pong*resize;
+		ping_pong != ping_pong; 
+		image_ptr = image_buff + ping_pong*image_info->image_size;
 
 		for (j = 0; j < num_packets; j++)
 		{
@@ -93,28 +79,16 @@ void *udp(void *udp_arg)
 		}
 
 		printf("~: Receiving %dth image frame\n", i);
-	
-		MPI_Scatter(
-			(void *)(image_buff+ping_pong*image_info->image_size),
-			image_info->buffer_size * arg->compthrds, 
-			MPI_INT,
-			strip_buff,	
-			msg_len,
-			MPI_INT,
-			pid;
-			MPI_COMM_WORLD);
 		
-		printf("udp: all threads stop here\n");
-		/* thread level sync */	
-		pthread_barrier_wait(&barrier);
-		/* process level sync*/
+		/* MPI sync */
 		MPI_Barrier(MPI_COMM_WORLD);
-	
+		
+		
 	}
 
 	//___________________________________________________________
-/*
-	
+
+/*	
 	while()
 	{
 		ping_pong != ping_pong;
@@ -139,36 +113,22 @@ void *udp(void *udp_arg)
 	close(sid);
 
 	printf("~: -- finished --\n");
-
+	
+	MPI_Win_free(win);
 	free(client_addr);
 	mem_free();
 
 	return 0;
 }
 
-int mem_alloc()
+void mem_alloc()
 {
-	/* modefy mem space for MPI_Scatter,
-	 * MPI_Scatter must send messages in same size, if each process receive different message size
-	 * resize the message size to keep them the same, assuming each blade is 4 core 8 threads computer
-	 */
-	int size;
-	if (compthrds % numprocs == 0)
-	{
-		size = image_info->image_size;
-	}
-	else
-	{	
-		size = image_info->buffer_size * totalthrds;
-	}
-	
-	if((image_buff = (uint16 *)malloc(2 * size * sizeof(uint16))) == NULL)
+	if((image_buff = (uint16 *)malloc(2 * image_info->image_size * sizeof(uint16))) == NULL)
 	{
 		printf("~: Error: could not allocate enought memory for image_buff!\n");
 		exit(0);
 	}
 
-	return size;
 }
 
 void mem_free()
@@ -176,4 +136,3 @@ void mem_free()
 	free(image_info);
 	free(image_buff);
 }
-

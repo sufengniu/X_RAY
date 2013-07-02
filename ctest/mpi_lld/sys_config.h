@@ -6,9 +6,10 @@
 #include <signal.h>
 #include <tiffio.h>
 #include <time.h>
-#include <pthread.h>
 #include <errno.h>
 #include <math.h>
+
+#include "mpi.h"
 
 #define BILLION 1000000000L;
 
@@ -32,19 +33,18 @@ int *y_low_bound, *y_high_bound;
 #define YLB_1                   0       // y low bound
 #define YHB_1                   961     // y high bound
 
-/* thread level global shared variables */
+/* MPI global variables */
 //___________________________________________________________
 
 static int CPU_THRS_NUM;
-int totalthrds;				// threads number in total
-int ttlcompthrds;			// computation threads in total
-int compthrds;				// computation threads in each thread
+
+int ttlprocs;				// total physical process number
+int compprocs				// computation proces in total
 int numprocs;				// process number
 int numthrds;				// threads number in each process
 
-uint16 *strip_buff;     // threads image buffer
-
-int thread_status;      // threads status for hand shaking
+uint16 *strip_buff;     // parallel process image buffer
+uint16 *image_buff;	// input image, remote mem acces enterance
 
 typedef struct image_info_type{
 	int width;
@@ -57,23 +57,11 @@ typedef struct image_info_type{
 } image_info_type;
 struct image_info_type *image_info;
 
-// Threads level barrier for sync
-pthread_barrier_t barrier;
-
 //____________________________________________________________
 
 static const char *output_filename[] = {"dark_avg.tif", "dark_rms.tif", "data.tif"};
 
 struct timespec tif_start, tif_stop;
 double tif_accum;
-
-/* arg for slave threads */
-typedef struct slave_arg
-{
-	int tid;	// thread id
-	int pid;	// process id
-	uint16 *image;	// image pointer
-} slave_arg;
-struct slave_arg *sarg; // slave arguments
 
 #endif

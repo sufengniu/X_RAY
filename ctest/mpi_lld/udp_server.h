@@ -14,7 +14,6 @@
 
 #include <math.h>
 
-#include "thr_pool.h"
 #include "mpi.h"
 
 #define PACKET_SIZE     1024
@@ -24,15 +23,9 @@ typedef struct id_type {
         // slave_thread_arg starg; // including pid and tid
 } id_type;
 
-typedef struct udp_arg_type {
-	int pid;
-	int numprocs;
-
-} udp_arg_type;
-
-uint16 **image_buff;	// input image buffer, each frame load into this memory
 uint16 *image_ptr;
 
+void udp();
 void mem_alloc();
 void mem_free();
 

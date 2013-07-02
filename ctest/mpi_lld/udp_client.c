@@ -2,6 +2,8 @@
 
 #include "tif.h"
 
+char *ipaddr = {"127.0.0.1"};
+
 int main(int argc, char *argv[])
 {
 	int i, j;	// i: image index, j: packet index
@@ -17,7 +19,7 @@ int main(int argc, char *argv[])
 	image_info = (struct image_info_type *)malloc(sizeof(struct image_info_type));	
 	
 	/* loading tif into memory */
-	tif_info(argv+1);
+	tif_info(argv+2);
 	mem_alloc();
 	tif_load(sim_image);		
 

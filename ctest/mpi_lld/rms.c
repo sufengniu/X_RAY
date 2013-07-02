@@ -7,32 +7,28 @@
  *
  */
 
-void *image_rms(int pid, uint16 *strip_buff)
+void rms_init()
 {
-	int i, k;	
-	int thread_status;
-		
 	/* allocate mem space */
-	rms_mem_alloc(pid, strip_buff);
+	rms_mem_alloc();
+}
 
-	for (i = (CPU_THRS_NUM-numthrds); i < CPU_THRS_NUM; i++) {
-		sarg[i].tid = i;
-		sarg[i].pid = pid;
 
-		thread_status = thr_pool_queue(pool, rms, (void *)(sarg));
-		if (thread_status == -1) {
-			printf("Error occure in process %d: adding rms thread failed!\n", pid);
-			exit(0);
-		}
-	}
+void image_rms(int rank, MPI_Win& win)
+{
+	int i, k;
+
+	rms_init();
 	
-	thr_pool_wait(pool);
+	rms(rank)
+	
+		
 	
 	rms_clean();
 	return (void *);
 }
 
-int rms_mem_alloc(int pid, uint16 *strip_buff)
+int rms_mem_alloc(int pid)
 {
 	int i;
 
@@ -44,35 +40,21 @@ int rms_mem_alloc(int pid, uint16 *strip_buff)
 	/* user memory allocate here */
 	//_________________________________________________________________
 
-	strip_buff = (uint16 **)malloc(compthrds * sizeof(void *));
-	for(i = 0; i < compthrds; i++){
-		if((*strip_buff+i) = (uint16 *)malloc(image_info->buffer_size * sizeof(uint16))) == NULL){
-			printf("Could not allocate enough memory for strip_buff");
-			exit(0);
-		}
+	if((dk0 = (uint16 *)malloc(image_info->buffer_length * image_info->buffer_width * sizeof(uint16))) == NULL){
+		printf("Could not allocate enough memory for dk0!\n");
+		exit(0);
 	}
 
-	dk0 = (uint16 **)malloc(compthrds * sizeof(void *));
-	for(i = 0; i < compthrds; i++){
-		if((*(dk0+i) = (uint16 *)malloc(image_info->buffer_size * sizeof(uint16))) == NULL){
-			printf("Could not allocate enough memory for dk0!\n");
-			exit(0);
-		}
+	if((avg_buff = (int16 *)malloc(image_info->buffer_length * image_info->buffer_width * sizeof(int16))) == NULL){
+		printf("Could not allocate enough memory for avg_buff!\n");
+		exit(0);
 	}
-	avg_buff = (int16 **)malloc(compthrds * sizeof(void *));
-	for(i = 0; i < compthrds; i++){
-		if((*(avg_buff+i) = (int16 *)malloc(image_info->buffer_size * sizeof(int16))) == NULL){
-			printf("Could not allocate enough memory for avg_buff!\n");
-			exit(0);
-		}
+
+	if((rms_buff = (uint16 *)malloc(image_info->buffer_length * image_info->buffer_width * sizeof(uint16))) == NULL){
+		printf("Could not allocate enough memory for rms_buff!\n");
+		exit(0);
 	}
-	rms_buff = (uint16 **)malloc(compthrds * sizeof(void *));
-	for(i = 0; i < compthrds; i++){
-		if((*(rms_buff+i) = (uint16 *)malloc(image_info->buffer_size * sizeof(uint16))) == NULL){
-			printf("Could not allocate enough memory for rms_buff!\n");
-			exit(0);
-		}
-	}
+
 	if((output_image_avg = (uint16 *)_TIFFmalloc(image_info->image_size * sizeof(uint16))) == NULL){
 		printf("Could not allocate enough memory for dark average output image!\n");
 		exit(0);
@@ -82,7 +64,7 @@ int rms_mem_alloc(int pid, uint16 *strip_buff)
 		exit(0);
 	}
 
-//_________________________________________________________________
+	//_________________________________________________________________
 
 	return 0;
 }
@@ -94,17 +76,17 @@ int rms_clean()
 	free(accum);
 
 	/* user memory free here */
-	for (i = 0; i < compthrds * numprocs; i++){
+	for (i = 0; i < totalthrds * numprocs; i++){
 		free(dk0[i]);
 	}
 	free(dk0);
 
-	for (i = 0; i < compthrds * numprocs; i++){
+	for (i = 0; i < totalthrds * numprocs; i++){
 		free(rms_buff[i]);
 	}
 	free(rms_buff);
 
-	for (i = 0; i < compthrds * numprocs; i++){
+	for (i = 0; i < totalthrds * numprocs; i++){
 		free(avg_buff[i]);
 	}
 	free(avg_buff);
@@ -113,39 +95,40 @@ int rms_clean()
 	tif_release(output_image_std);
 }
 
-void *rms(void *sarg)
+void rms(int rank)
 {
 	int i, j, k;	//i: column, j: row, k: page_num
 	int tid, pid;
 	long int image_index;
-	struct slave_arg *p = (struct slave_arg *)sarg;
 
-	tid = p->tid;
+
+
 	MPI_Common_rank(MPI_COMM_WORLD, &pid);
 
 	printf("process %d thread %d: actived\n", pid, tid);
+
+	MPI_Barrier(MPI_COMM_WORLD);
 
 	/* user function defined here */	
 //__________________________________________________________________
 
 	for (k = 0; k < image_info->page_num; k++) {
-		
-		/* Threads level barrier sync */
-		pthread_barrier_wait(&barrier);
-		/* MPI barrier sync */
+
 		MPI_Barrier(MPI_COMM_WORLD);
 
 		if (k = 0){
 			/* caculate in recursive method 3 */
 			for (i = 0; i<image_info->buffer_length; i++){
-				for (j = 0; j<image_info->buffer_width; j++){	
-					dk0[tid][j+i*image_info->buffer_width] = strip_buff[tid][j+i*image_info->buffer_width];
+				for (j = 0; j<image_info->buffer_width; j++){
+					image_index = j + i * image_info->buffer_width + tid * image_info->buffer_size;
+					*(*(dk0 + tid) + j + i * image_info->buffer_width) = input_image[image_index];
 				}
 			}
 		}
 		else {
 			for (i = 0; i<image_info->buffer_length; i++){
-				for (j = 0; j<image_info->buffer_width; j++){	
+				for (j = 0; j<image_info->buffer_width; j++){
+					image_index = j + i * image_info->buffer_width + tid * image_info->buffer_size + k * image_info->image_size;
 
 					/* caculate in recursive method 3 */
 					diff_sum = (image[image_index] - *(*(dk0 + tid) + j + i * image_info->buffer_width));

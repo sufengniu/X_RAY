@@ -100,7 +100,7 @@ int dkm(int argc, char *argv[])
 		image_rms(pid, );	
 	}
 	else {
-		MPI_Scatter	// added MPI scatter			
+				
 		image_rms(pid, );
 
 	}

@@ -36,7 +36,7 @@
 
 /* udp socket */
 #define PORT			2346	// the sender and reciver port
-char *ipaddr = {"127.0.0.1"};
+static char *ipaddr = {"127.0.0.1"};
 
 int NUM_THREADS, NUM_PROCESS_THREADS;	// threads number, number of processing threads
 int NUM_PROCESS;			// process number
